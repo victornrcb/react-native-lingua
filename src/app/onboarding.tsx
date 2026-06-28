@@ -16,7 +16,7 @@ export default function OnboardingScreen() {
           style={{ width: 44, height: 44 }}
           resizeMode="contain"
         />
-        <Text className="text-h2 ml-2 text-text-primary">muolingo</Text>
+        <Text className="text-h2 ml-2 text-text-primary">lingua</Text>
       </View>
 
       {/* Main Content */}
@@ -64,16 +64,23 @@ export default function OnboardingScreen() {
       {/* Footer Area */}
       <View className="px-6 pb-8">
         <Pressable
-          className="bg-lingua-purple py-1 rounded-2xl flex-row justify-center items-center"
-          onPress={() => router.push("/")}
+          className="bg-lingua-purple py-4 rounded-2xl flex-row justify-center items-center"
+          onPress={() => router.replace("/")}
         >
           <Text className="text-white text-h3 mr-2 font-poppins-semibold">
             Get Started
           </Text>
-          <Text className="text-white text-h1 mr-2 font-poppins-medium">
-            &gt;
-          </Text>
-          <SymbolView name="chevron.right" size={24} tintColor="white" />
+          <SymbolView
+            name="chevron.right"
+            size={24}
+            tintColor="white"
+            style={{ width: 24, height: 24 }}
+            fallback={
+              <Text className="text-white text-h3 font-poppins-medium">
+                &gt;
+              </Text>
+            }
+          />
         </Pressable>
       </View>
     </SafeAreaView>
