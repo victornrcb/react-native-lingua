@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Pressable } from "react-native";
+import { Link } from "expo-router";
 
 export default function Index() {
   return (
@@ -16,9 +17,11 @@ export default function Index() {
         <Text className="text-body-md text-text-secondary">
           Colors, typographies, and fonts are successfully configured.
         </Text>
-        <View className="mt-4 bg-success px-4 py-2 rounded-lg items-center">
-          <Text className="text-body-lg text-background font-poppins-semibold">Get Started</Text>
-        </View>
+        <Link href="/onboarding" asChild>
+          <Pressable className="mt-4 bg-success px-4 py-3 rounded-lg items-center">
+            <Text className="text-body-lg text-background font-poppins-semibold">Go to Onboarding</Text>
+          </Pressable>
+        </Link>
       </View>
     </View>
   );
