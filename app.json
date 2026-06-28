@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.erick45642.duolingoclone"
     },
     "web": {
       "output": "static",
@@ -39,6 +40,19 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2ea22e93-7cfe-448c-8e0a-b878e218a9da"
+      }
+    },
+    "owner": "erick45642",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2ea22e93-7cfe-448c-8e0a-b878e218a9da"
     }
   }
 }
