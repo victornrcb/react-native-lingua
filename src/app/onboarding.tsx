@@ -1,5 +1,5 @@
 import { images } from "@/constants/images";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,6 +9,7 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Stack.Screen options={{ headerShown: false }} />
       {/* Top Logo */}
       <View className="flex-row items-center justify-center mt-2">
         <Image
@@ -31,7 +32,7 @@ export default function OnboardingScreen() {
         </Text>
 
         {/* Mascot Illustration */}
-        <View className="flex-1 items-center justify-center my-4 px-2 relative">
+        <View className="flex-1 items-center justify-center my-4 relative">
           {/* Hello bubble */}
           <View className="absolute top-[10%] left-[0%] bg-[#F0F6FF] px-5 py-3 rounded-3xl -rotate-6 z-10">
             <Text className="text-h3 font-poppins-semibold text-text-primary">
@@ -53,11 +54,13 @@ export default function OnboardingScreen() {
             </Text>
           </View>
 
-          <Image
-            source={images.mascotWelcome}
-            style={{ width: "95%", height: "100%", zIndex: 1 }}
-            resizeMode="contain"
-          />
+          <View className="flex-1 justify-top items-center mb-4 mr-14 w-full h-full">
+            <Image
+              source={images.mascotWelcome}
+              style={{ width: "110%", height: "110%", zIndex: 1 }}
+              resizeMode="contain"
+            />
+          </View>
         </View>
       </View>
 
@@ -65,7 +68,7 @@ export default function OnboardingScreen() {
       <View className="px-6 pb-8">
         <Pressable
           className="bg-lingua-purple py-4 rounded-2xl flex-row justify-center items-center"
-          onPress={() => router.replace("/")}
+          onPress={() => router.push("/sign-up")}
         >
           <Text className="text-white text-h3 mr-2 font-poppins-semibold">
             Get Started
