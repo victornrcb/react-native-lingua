@@ -3,8 +3,9 @@ import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Image,
-  KeyboardAvoidingView,
+  Keyboard,
   Modal,
   Platform,
   Pressable,
@@ -25,6 +26,12 @@ export default function SignUpScreen() {
   const [showModal, setShowModal] = useState(false);
   const [code, setCode] = useState("");
   const inputRef = useRef<TextInput>(null);
+  // Animated value that tracks the keyboard height inside the Modal.
+  // KeyboardAvoidingView is broken inside Modal (its node measurement returns 0
+  // because Modal renders in a separate native UIWindow), which causes the
+  // flicker. Manual Keyboard listeners give us the exact height and duration
+  // so we can animate paddingBottom to match the keyboard precisely.
+  const keyboardPadding = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (code.length === 6) {
@@ -34,11 +41,42 @@ export default function SignUpScreen() {
     }
   }, [code, router]);
 
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = Keyboard.addListener(showEvent, (e) => {
+      Animated.timing(keyboardPadding, {
+        toValue: e.endCoordinates.height,
+        duration: e.duration ?? 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    const onHide = Keyboard.addListener(hideEvent, (e) => {
+      Animated.timing(keyboardPadding, {
+        toValue: 0,
+        duration: e.duration ?? 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    return () => {
+      onShow.remove();
+      onHide.remove();
+    };
+  }, [keyboardPadding]);
+
   const handleSignUp = () => {
+    Keyboard.dismiss();
     setShowModal(true);
   };
 
   const handleModalShow = () => {
+    // Reset padding before focusing so the animation starts from 0
+    keyboardPadding.setValue(0);
     // Focus the hidden input once the modal is fully visible so the keyboard appears
     inputRef.current?.focus();
   };
@@ -164,7 +202,7 @@ export default function SignUpScreen() {
 
           <Pressable className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3">
             <Text className="font-poppins-bold text-[#000000] text-[22px] absolute left-6">
-              
+              
             </Text>
             <Text className="text-text-primary text-body-lg font-poppins-medium">
               Continue with Apple
@@ -191,74 +229,72 @@ export default function SignUpScreen() {
         animationType="slide"
         onShow={handleModalShow}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "flex-end",
-          }}
-        >
-          <Pressable style={{ flex: 1 }} onPress={() => setShowModal(false)} />
-          {/* Wrap the sheet in a relative container so the overlay input fills it */}
-          <View
-            style={{ position: "relative" }}
-            className="bg-background rounded-t-3xl p-6 pt-8 pb-12 items-center"
-          >
-            <Text className="text-h2 text-text-primary mb-2">
-              Check your email
-            </Text>
-            <Text className="text-body-md text-text-secondary text-center mb-8 px-4">
-              We've sent a 6-digit verification code to your email.
-            </Text>
+        {/* Backdrop — absolute so it sits behind the sheet independently */}
+        <Pressable
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: "rgba(0,0,0,0.5)" },
+          ]}
+          onPress={() => setShowModal(false)}
+        />
+        {/* Outer container pins the sheet to the bottom of the screen */}
+        <View style={styles.modalContainer} pointerEvents="box-none">
+          {/*
+            Animated.View tracks keyboard height via Keyboard listeners.
+            paddingBottom lifts the sheet above the keyboard when shown,
+            and drops it back to the bottom when dismissed — no flicker.
+          */}
+          <Animated.View style={{ paddingBottom: keyboardPadding }}>
+            <View style={styles.sheet}>
+              <Text className="text-h2 text-text-primary mb-2">
+                Check your email
+              </Text>
+              <Text className="text-body-md text-text-secondary text-center mb-8 px-4">
+                We've sent a 6-digit verification code to your email.
+              </Text>
 
-            {/* Code Inputs Display */}
-            <Pressable
-              className="flex-row gap-x-2"
-              onPress={() => inputRef.current?.focus()}
-            >
-              {[0, 1, 2, 3, 4, 5].map((index) => (
-                <View
-                  key={index}
-                  className={`w-12 h-14 border rounded-xl justify-center items-center bg-surface ${
-                    code.length === index
-                      ? "border-lingua-purple"
-                      : "border-border"
-                  }`}
-                >
-                  <Text className="text-h2 text-text-primary">
-                    {code[index] || ""}
-                  </Text>
-                </View>
-              ))}
-            </Pressable>
-
-            {/*
-              Hidden TextInput: must have real (non-zero) dimensions so the
-              OS considers it focusable and shows the keyboard.
-              It sits as an absolute overlay over the whole sheet.
-            */}
-            <TextInput
-              ref={inputRef}
-              value={code}
-              onChangeText={(text) => {
-                const numericText = text.replace(/[^0-9]/g, "");
-                if (numericText.length <= 6) setCode(numericText);
-              }}
-              keyboardType="number-pad"
-              maxLength={6}
-              caretHidden
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                opacity: 0,
-              }}
-            />
-          </View>
-        </KeyboardAvoidingView>
+              {/* Code Inputs Display */}
+              <Pressable
+                className="flex-row gap-x-2 relative"
+                onPress={() => inputRef.current?.focus()}
+              >
+                {[0, 1, 2, 3, 4, 5].map((index) => (
+                  <View
+                    key={index}
+                    className={`w-12 h-14 border rounded-xl justify-center items-center bg-surface ${
+                      code.length === index
+                        ? "border-lingua-purple"
+                        : "border-border"
+                    }`}
+                  >
+                    <Text className="text-h2 text-text-primary">
+                      {code[index] || ""}
+                    </Text>
+                    <TextInput
+                      ref={inputRef}
+                      value={code}
+                      onChangeText={(text) => {
+                        const numericText = text.replace(/[^0-9]/g, "");
+                        if (numericText.length <= 6) setCode(numericText);
+                      }}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      caretHidden
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        opacity: 0,
+                      }}
+                    />
+                  </View>
+                ))}
+              </Pressable>
+            </View>
+          </Animated.View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -275,5 +311,18 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 24,
     paddingTop: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 48,
+    alignItems: "center",
   },
 });
