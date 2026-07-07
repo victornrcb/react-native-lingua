@@ -137,9 +137,6 @@ export default function SignInScreen() {
           : setError(
               createError.message ?? "Something went wrong. Please try again.",
             );
-        if (error === "Identifier is invalid") {
-          setError("Email is invalid");
-        }
         console.error("Create sign in error", createError);
         return;
       }

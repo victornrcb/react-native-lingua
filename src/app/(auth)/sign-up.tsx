@@ -37,6 +37,7 @@ export default function SignUpScreen() {
   const insets = useSafeAreaInsets();
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -259,19 +260,25 @@ export default function SignUpScreen() {
               </Text>
               <TextInput
                 placeholder="••••••••"
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 className="text-body-lg text-text-primary font-poppins-medium pt-1 p-0 m-0"
                 placeholderTextColor="#A1A1AA"
                 value={password}
                 onChangeText={(password) => setPassword(password)}
               />
             </View>
-            <SymbolView
-              name="eye"
-              size={20}
-              tintColor="#6B7280"
-              fallback={<Text className="text-text-secondary">👁</Text>}
-            />
+            <Pressable onPress={() => setShowPassword((prev) => !prev)}>
+              <SymbolView
+                name={showPassword ? "eye.slash" : "eye"}
+                size={20}
+                tintColor="#6B7280"
+                fallback={
+                  <Text className="text-text-secondary">
+                    {showPassword ? "🙈" : "👁"}
+                  </Text>
+                }
+              />
+            </Pressable>
           </View>
         </View>
 
