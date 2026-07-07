@@ -1,8 +1,13 @@
-import { useRouter } from "expo-router";
+import { useAuth } from "@clerk/expo";
+import { Redirect, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
+  const { isSignedIn, isLoaded, signOut } = useAuth();
   const router = useRouter();
+
+  if (!isLoaded) return null;
+  if (!isSignedIn) return <Redirect href="/onboarding" />;
 
   return (
     <View className="flex-1 justify-center items-center bg-background px-4">
@@ -23,6 +28,17 @@ export default function Index() {
         >
           <Text className="text-body-lg text-background font-poppins-semibold">
             Go to Onboarding
+          </Text>
+        </Pressable>
+        <Pressable
+          className="mt-4 bg-error px-4 py-3 rounded-lg items-center"
+          onPress={async () => {
+            await signOut();
+            router.replace("/onboarding");
+          }}
+        >
+          <Text className="text-body-lg text-background font-poppins-semibold">
+            Sign Out
           </Text>
         </Pressable>
       </View>

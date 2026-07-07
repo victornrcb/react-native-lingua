@@ -1,11 +1,15 @@
 import { images } from "@/constants/images";
+import { useAuth } from "@clerk/expo";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OnboardingScreen() {
+  const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
+
+  if (!isLoaded) return null;
 
   return (
     <SafeAreaView style={styles.safeArea}>

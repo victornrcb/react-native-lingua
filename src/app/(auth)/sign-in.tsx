@@ -1,6 +1,8 @@
 import { images } from "@/constants/images";
+import { useOAuth, useSignIn } from "@clerk/expo";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
+import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -9,37 +11,89 @@ import {
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function SignUpScreen() {
+WebBrowser.maybeCompleteAuthSession();
+
+export const useWarmUpBrowser = () => {
+  useEffect(() => {
+    void WebBrowser.warmUpAsync();
+    return () => {
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
+};
+
+export default function SignInScreen() {
+  useWarmUpBrowser();
+  const { signIn } = useSignIn();
+  const [emailAddress, setEmailAddress] = useState("");
+  const { startOAuthFlow: startGoogleFlow } = useOAuth({
+    strategy: "oauth_google",
+  });
+  const { startOAuthFlow: startFacebookFlow } = useOAuth({
+    strategy: "oauth_facebook",
+  });
+  const { startOAuthFlow: startAppleFlow } = useOAuth({
+    strategy: "oauth_apple",
+  });
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [showModal, setShowModal] = useState(false);
   const [code, setCode] = useState("");
+  const [error, setError] = useState("");
   const inputRef = useRef<TextInput>(null);
-  // Animated value that tracks the keyboard height inside the Modal.
-  // KeyboardAvoidingView is broken inside Modal (its node measurement returns 0
-  // because Modal renders in a separate native UIWindow), which causes the
-  // flicker. Manual Keyboard listeners give us the exact height and duration
-  // so we can animate paddingBottom to match the keyboard precisely.
+
   const keyboardPadding = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    if (code.length === 6) {
-      // automatically navigate to home when the last digit is entered
-      setShowModal(false);
-      router.replace("/");
+  const handleCode = async (numericText: string) => {
+    setCode(numericText);
+    if (numericText.length === 6) {
+      try {
+        const { error: verifyError } = await signIn!.emailCode.verifyCode({
+          code: numericText,
+        });
+
+        if (verifyError) {
+          console.error("Verification error:", verifyError.message);
+          return;
+        }
+
+        if (signIn!.status === "complete") {
+          await signIn!.finalize({
+            navigate: () => router.replace("/"),
+          });
+          setShowModal(false);
+        }
+      } catch (err) {
+        console.error("Verification error:", JSON.stringify(err, null, 2));
+      }
     }
-  }, [code, router]);
+  };
+
+  const handleOAuth = async (
+    strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
+  ) => {
+    try {
+      const flow =
+        strategy === "oauth_google"
+          ? startGoogleFlow
+          : strategy === "oauth_facebook"
+            ? startFacebookFlow
+            : startAppleFlow;
+      const { createdSessionId, setActive } = await flow();
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/");
+      }
+    } catch (err) {
+      console.error("OAuth error", err);
+    }
+  };
 
   useEffect(() => {
     const showEvent =
@@ -69,9 +123,44 @@ export default function SignUpScreen() {
     };
   }, [keyboardPadding]);
 
-  const handleSignUp = () => {
+  const handleSignIn = async () => {
+    if (!signIn || !emailAddress) return;
     Keyboard.dismiss();
-    setShowModal(true);
+    setError("");
+    try {
+      const { error: createError } = await signIn.create({
+        identifier: emailAddress,
+      });
+      if (createError) {
+        createError.message === "Identifier is invalid."
+          ? setError("Email is invalid.")
+          : setError(
+              createError.message ?? "Something went wrong. Please try again.",
+            );
+        if (error === "Identifier is invalid") {
+          setError("Email is invalid");
+        }
+        console.error("Create sign in error", createError);
+        return;
+      }
+
+      const { error: sendError } = await signIn.emailCode.sendCode();
+
+      if (sendError) {
+        setError(sendError.message ?? "Failed to send verification code.");
+        console.error("Send code error", sendError);
+        return;
+      }
+
+      setShowModal(true);
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: { message: string }[] };
+      const message =
+        clerkError?.errors?.[0]?.message ??
+        "Something went wrong. Please try again.";
+      setError(message);
+      console.error("Sign-in error:", JSON.stringify(err, null, 2));
+    }
   };
 
   const handleModalShow = () => {
@@ -82,17 +171,9 @@ export default function SignUpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+    <SafeAreaView style={styles.safeArea}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: insets.bottom + 24 },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+      <View className="px-6 flex-1 bg-background pt-2">
         {/* Back Button */}
         <Pressable
           onPress={() => router.back()}
@@ -107,15 +188,9 @@ export default function SignUpScreen() {
           />
         </Pressable>
 
-        <Text
-          className="text-h1 text-text-primary mt-4"
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          Create your account
-        </Text>
+        <Text className="text-h1 text-text-primary mt-4">Welcome back</Text>
         <Text className="text-body-lg text-text-secondary mt-1">
-          Start your language journey today ✨
+          Continue your language journey ✨
         </Text>
 
         {/* Mascot Image */}
@@ -127,7 +202,7 @@ export default function SignUpScreen() {
           />
         </View>
 
-        {/* Form */}
+        {/* Form — email only, no password */}
         <View className="mt-6">
           <View className="border border-border rounded-2xl px-4 py-3">
             <Text className="text-caption text-text-secondary font-poppins-medium">
@@ -139,36 +214,25 @@ export default function SignUpScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
               placeholderTextColor="#A1A1AA"
-            />
-          </View>
-
-          <View className="border border-border rounded-2xl px-4 py-3 flex-row items-center mt-4">
-            <View className="flex-1">
-              <Text className="text-caption text-text-secondary font-poppins-medium">
-                Password
-              </Text>
-              <TextInput
-                placeholder="••••••••"
-                secureTextEntry
-                className="text-body-lg text-text-primary font-poppins-medium pt-1 p-0 m-0"
-                placeholderTextColor="#A1A1AA"
-              />
-            </View>
-            <SymbolView
-              name="eye"
-              size={20}
-              tintColor="#6B7280"
-              fallback={<Text className="text-text-secondary">👁</Text>}
+              value={emailAddress}
+              onChangeText={setEmailAddress}
             />
           </View>
         </View>
 
+        {!!error && (
+          <Text className="text-red-500 text-body-sm font-poppins-medium mt-3">
+            {error}
+          </Text>
+        )}
+
         <Pressable
-          className="bg-lingua-purple py-4 rounded-2xl flex-row justify-center items-center mt-6"
-          onPress={handleSignUp}
+          className="bg-lingua-purple disabled:opacity-50 py-4 rounded-2xl flex-row justify-center items-center mt-4"
+          onPress={handleSignIn}
+          disabled={!emailAddress || !signIn}
         >
           <Text className="text-white text-h3 font-poppins-semibold">
-            Sign Up
+            Sign In
           </Text>
         </Pressable>
 
@@ -181,8 +245,12 @@ export default function SignUpScreen() {
           <View className="flex-1 h-[1px] bg-border" />
         </View>
 
+        {/* Social Buttons */}
         <View>
-          <Pressable className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center">
+          <Pressable
+            onPress={() => handleOAuth("oauth_google")}
+            className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center"
+          >
             <Text className="font-poppins-bold text-[#EA4335] text-[20px] absolute left-6">
               G
             </Text>
@@ -191,7 +259,10 @@ export default function SignUpScreen() {
             </Text>
           </Pressable>
 
-          <Pressable className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3">
+          <Pressable
+            onPress={() => handleOAuth("oauth_facebook")}
+            className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3"
+          >
             <Text className="font-poppins-bold text-[#1877F2] text-[20px] absolute left-6">
               f
             </Text>
@@ -200,27 +271,28 @@ export default function SignUpScreen() {
             </Text>
           </Pressable>
 
-          <Pressable className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3">
-            <Text className="font-poppins-bold text-[#000000] text-[22px] absolute left-6">
-              
-            </Text>
+          <Pressable
+            onPress={() => handleOAuth("oauth_apple")}
+            className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3"
+          >
+            <Text className="font-poppins-bold text-[#000000] text-[22px] absolute left-6"></Text>
             <Text className="text-text-primary text-body-lg font-poppins-medium">
               Continue with Apple
             </Text>
           </Pressable>
         </View>
 
-        <View className="mt-6 flex-row justify-center items-center">
+        <View className="mt-auto mb-6 flex-row justify-center items-center">
           <Text className="text-body-md text-text-secondary">
-            Already have an account?{" "}
+            Don't have an account?{" "}
           </Text>
-          <Pressable onPress={() => router.replace("/sign-in")}>
+          <Pressable onPress={() => router.replace("/sign-up")}>
             <Text className="text-body-md text-lingua-purple font-poppins-semibold">
-              Log in
+              Sign up
             </Text>
           </Pressable>
         </View>
-      </ScrollView>
+      </View>
 
       {/* Verification Modal */}
       <Modal
@@ -275,7 +347,7 @@ export default function SignUpScreen() {
                       value={code}
                       onChangeText={(text) => {
                         const numericText = text.replace(/[^0-9]/g, "");
-                        if (numericText.length <= 6) setCode(numericText);
+                        if (numericText.length <= 6) handleCode(numericText);
                       }}
                       keyboardType="number-pad"
                       maxLength={6}
@@ -304,13 +376,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-  },
-  scroll: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
   },
   modalContainer: {
     flex: 1,

@@ -1,6 +1,8 @@
 import { images } from "@/constants/images";
+import { useOAuth, useSignUp } from "@clerk/expo";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
+import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -9,17 +11,35 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-export default function SignInScreen() {
+export default function SignUpScreen() {
+  const { signUp } = useSignUp();
+  const { startOAuthFlow: startGoogleFlow } = useOAuth({
+    strategy: "oauth_google",
+  });
+  const { startOAuthFlow: startFacebookFlow } = useOAuth({
+    strategy: "oauth_facebook",
+  });
+  const { startOAuthFlow: startAppleFlow } = useOAuth({
+    strategy: "oauth_apple",
+  });
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [code, setCode] = useState("");
+  const [error, setError] = useState("");
   const inputRef = useRef<TextInput>(null);
   // Animated value that tracks the keyboard height inside the Modal.
   // KeyboardAvoidingView is broken inside Modal (its node measurement returns 0
@@ -28,13 +48,53 @@ export default function SignInScreen() {
   // so we can animate paddingBottom to match the keyboard precisely.
   const keyboardPadding = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    if (code.length === 6) {
-      // Automatically navigate to home when the last digit is entered
-      setShowModal(false);
-      router.replace("/");
+  const handleCode = async (numericText: string) => {
+    setCode(numericText);
+    if (numericText.length === 6) {
+      try {
+        const { error: verifyError } =
+          await signUp!.verifications.verifyEmailCode({
+            code: numericText,
+          });
+
+        if (verifyError) {
+          console.error("Verification error:", verifyError.message);
+          return;
+        }
+
+        if (signUp!.status === "missing_requirements") {
+          const missing = signUp!.missingFields || [];
+          const updatePayload: Record<string, string> = {};
+
+          if (missing.includes("username")) {
+            updatePayload.username =
+              emailAddress.split("@")[0] + Math.floor(Math.random() * 10000);
+          }
+          if (missing.includes("first_name")) {
+            updatePayload.firstName = emailAddress.split("@")[0];
+          }
+          if (missing.includes("last_name")) {
+            updatePayload.lastName = "User";
+          }
+
+          if (Object.keys(updatePayload).length > 0) {
+            await signUp!.update(updatePayload);
+          }
+        }
+
+        if (signUp!.status === "complete") {
+          await signUp!.finalize({
+            navigate: () => router.replace("/"),
+          });
+          setShowModal(false);
+        } else {
+          console.error("Sign-up attempt not complete:", signUp!.status);
+        }
+      } catch (err) {
+        console.error("Verification error:", JSON.stringify(err, null, 2));
+      }
     }
-  }, [code, router]);
+  };
 
   useEffect(() => {
     const showEvent =
@@ -64,9 +124,62 @@ export default function SignInScreen() {
     };
   }, [keyboardPadding]);
 
-  const handleSignIn = () => {
+  useEffect(() => {
+    void WebBrowser.warmUpAsync();
+    return () => {
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
+
+  const handleOAuth = async (
+    strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
+  ) => {
+    try {
+      const flow =
+        strategy === "oauth_google"
+          ? startGoogleFlow
+          : strategy === "oauth_facebook"
+            ? startFacebookFlow
+            : startAppleFlow;
+      const { createdSessionId, setActive } = await flow();
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/");
+      }
+    } catch (err) {
+      console.error("OAuth error", err);
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!signUp) return;
     Keyboard.dismiss();
-    setShowModal(true);
+    setError("");
+    try {
+      const { error: createError } = await signUp.create({
+        emailAddress,
+        password,
+      });
+      if (createError) {
+        setError(createError.message ?? "Something went wrong. Please try again.");
+        console.error("Sign up create error:", createError.message);
+        return;
+      }
+
+      const { error: prepError } = await signUp.verifications.sendEmailCode();
+      if (prepError) {
+        setError(prepError.message ?? "Failed to send verification code.");
+        console.error("Send code error:", prepError.message);
+        return;
+      }
+
+      setShowModal(true);
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: { message: string }[] };
+      const message = clerkError?.errors?.[0]?.message ?? "Something went wrong. Please try again.";
+      setError(message);
+      console.error("Sign-up error:", JSON.stringify(err, null, 2));
+    }
   };
 
   const handleModalShow = () => {
@@ -77,9 +190,17 @@ export default function SignInScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="px-6 flex-1 bg-background pt-2">
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Back Button */}
         <Pressable
           onPress={() => router.back()}
@@ -94,9 +215,15 @@ export default function SignInScreen() {
           />
         </Pressable>
 
-        <Text className="text-h1 text-text-primary mt-4">Welcome back</Text>
+        <Text
+          className="text-h1 text-text-primary mt-4"
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          Create your account
+        </Text>
         <Text className="text-body-lg text-text-secondary mt-1">
-          Continue your language journey ✨
+          Start your language journey today ✨
         </Text>
 
         {/* Mascot Image */}
@@ -108,7 +235,7 @@ export default function SignInScreen() {
           />
         </View>
 
-        {/* Form — email only, no password */}
+        {/* Form */}
         <View className="mt-6">
           <View className="border border-border rounded-2xl px-4 py-3">
             <Text className="text-caption text-text-secondary font-poppins-medium">
@@ -120,16 +247,47 @@ export default function SignInScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
               placeholderTextColor="#A1A1AA"
+              value={emailAddress}
+              onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
+            />
+          </View>
+
+          <View className="border border-border rounded-2xl px-4 py-3 flex-row items-center mt-4">
+            <View className="flex-1">
+              <Text className="text-caption text-text-secondary font-poppins-medium">
+                Password
+              </Text>
+              <TextInput
+                placeholder="••••••••"
+                secureTextEntry
+                className="text-body-lg text-text-primary font-poppins-medium pt-1 p-0 m-0"
+                placeholderTextColor="#A1A1AA"
+                value={password}
+                onChangeText={(password) => setPassword(password)}
+              />
+            </View>
+            <SymbolView
+              name="eye"
+              size={20}
+              tintColor="#6B7280"
+              fallback={<Text className="text-text-secondary">👁</Text>}
             />
           </View>
         </View>
 
+        {!!error && (
+          <Text className="text-red-500 text-body-sm font-poppins-medium mt-3">
+            {error}
+          </Text>
+        )}
+
         <Pressable
-          className="bg-lingua-purple py-4 rounded-2xl flex-row justify-center items-center mt-6"
-          onPress={handleSignIn}
+          className="bg-lingua-purple disabled:opacity-50 py-4 rounded-2xl flex-row justify-center items-center mt-4"
+          onPress={handleSignUp}
+          disabled={!emailAddress || !password || !signUp}
         >
           <Text className="text-white text-h3 font-poppins-semibold">
-            Sign In
+            Sign Up
           </Text>
         </Pressable>
 
@@ -142,9 +300,11 @@ export default function SignInScreen() {
           <View className="flex-1 h-[1px] bg-border" />
         </View>
 
-        {/* Social Buttons */}
         <View>
-          <Pressable className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center">
+          <Pressable
+            onPress={() => handleOAuth("oauth_google")}
+            className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center"
+          >
             <Text className="font-poppins-bold text-[#EA4335] text-[20px] absolute left-6">
               G
             </Text>
@@ -153,7 +313,10 @@ export default function SignInScreen() {
             </Text>
           </Pressable>
 
-          <Pressable className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3">
+          <Pressable
+            onPress={() => handleOAuth("oauth_facebook")}
+            className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3"
+          >
             <Text className="font-poppins-bold text-[#1877F2] text-[20px] absolute left-6">
               f
             </Text>
@@ -162,7 +325,10 @@ export default function SignInScreen() {
             </Text>
           </Pressable>
 
-          <Pressable className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3">
+          <Pressable
+            onPress={() => handleOAuth("oauth_apple")}
+            className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center mt-3"
+          >
             <Text className="font-poppins-bold text-[#000000] text-[22px] absolute left-6"></Text>
             <Text className="text-text-primary text-body-lg font-poppins-medium">
               Continue with Apple
@@ -170,17 +336,17 @@ export default function SignInScreen() {
           </Pressable>
         </View>
 
-        <View className="mt-auto mb-6 flex-row justify-center items-center">
+        <View className="mt-6 flex-row justify-center items-center">
           <Text className="text-body-md text-text-secondary">
-            Don't have an account?{" "}
+            Already have an account?{" "}
           </Text>
-          <Pressable onPress={() => router.replace("/sign-up")}>
+          <Pressable onPress={() => router.replace("/sign-in")}>
             <Text className="text-body-md text-lingua-purple font-poppins-semibold">
-              Sign up
+              Log in
             </Text>
           </Pressable>
         </View>
-      </View>
+      </ScrollView>
 
       {/* Verification Modal */}
       <Modal
@@ -235,7 +401,7 @@ export default function SignInScreen() {
                       value={code}
                       onChangeText={(text) => {
                         const numericText = text.replace(/[^0-9]/g, "");
-                        if (numericText.length <= 6) setCode(numericText);
+                        if (numericText.length <= 6) handleCode(numericText);
                       }}
                       keyboardType="number-pad"
                       maxLength={6}
@@ -264,6 +430,13 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
   },
   modalContainer: {
     flex: 1,
