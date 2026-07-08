@@ -1,5 +1,6 @@
 import { useAuth } from "@clerk/expo";
 import { Redirect, useRouter } from "expo-router";
+import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
@@ -22,16 +23,25 @@ export default function Index() {
         <Text className="text-body-md text-text-secondary">
           Colors, typographies, and fonts are successfully configured.
         </Text>
+
+        {/* Language selection link */}
         <Pressable
-          className="mt-4 bg-success px-4 py-3 rounded-lg items-center"
-          onPress={() => router.replace("/onboarding")}
+          className="mt-4 bg-lingua-purple px-4 py-3 rounded-lg flex-row items-center justify-center"
+          onPress={() => router.push("/language-select")}
         >
+          <SymbolView
+            name="globe"
+            size={20}
+            tintColor="#FFFFFF"
+            style={{ width: 20, height: 20, marginRight: 8 }}
+            fallback={<Text className="text-white mr-2">🌍</Text>}
+          />
           <Text className="text-body-lg text-background font-poppins-semibold">
-            Go to Onboarding
+            Choose a Language
           </Text>
         </Pressable>
         <Pressable
-          className="mt-4 bg-error px-4 py-3 rounded-lg items-center"
+          className="mt-3 bg-error px-4 py-3 rounded-lg items-center"
           onPress={async () => {
             await signOut();
             router.replace("/onboarding");
