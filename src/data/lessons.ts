@@ -14,6 +14,7 @@
 import {
   Activity,
   AITeacherPrompt,
+  LanguageCode,
   Lesson,
   LessonGoal,
   Phrase,
@@ -984,7 +985,7 @@ export const allLessons: Lesson[] = [
  * All lessons indexed by language code.
  * Usage: `lessonsByLanguage["es"]` → Spanish lessons array.
  */
-export const lessonsByLanguage: Record<string, Lesson[]> = {
+export const lessonsByLanguage: Partial<Record<LanguageCode, Lesson[]>> = {
   es: spanishLessons,
   fr: frenchLessons,
   ja: japaneseLessons,

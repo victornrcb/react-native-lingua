@@ -6,7 +6,7 @@
 // ──────────────────── Language ────────────────────────────────────────────────
 
 /** Supported learning languages. Add new codes here as the app grows. */
-export type LanguageCode = "es" | "fr" | "de" | "ja" | "pt" | "it";
+export type LanguageCode = "es" | "fr" | "de" | "ja" | "it";
 
 export interface Language {
   /** BCP-47 language code, e.g. "es" */

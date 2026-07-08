@@ -5,7 +5,7 @@
 // Learn tab. Add a new object here to extend the course.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Unit } from "@/types/learning";
+import { Unit, LanguageCode } from "@/types/learning";
 
 // ──────────────────── Spanish Units ───────────────────────────────────────────
 
@@ -85,7 +85,7 @@ export const japaneseUnits: Unit[] = [
  * All units indexed by language code.
  * Usage: `unitsByLanguage["es"]` → Spanish units array.
  */
-export const unitsByLanguage: Record<string, Unit[]> = {
+export const unitsByLanguage: Partial<Record<LanguageCode, Unit[]>> = {
   es: spanishUnits,
   fr: frenchUnits,
   ja: japaneseUnits,
