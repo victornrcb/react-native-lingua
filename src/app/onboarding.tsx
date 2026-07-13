@@ -1,7 +1,7 @@
 import { images } from "@/constants/images";
 import { useAuth } from "@clerk/expo";
 import { Redirect, Stack, useRouter } from "expo-router";
-import { SymbolView } from "expo-symbols";
+import { Ionicons } from "@expo/vector-icons";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -78,17 +78,7 @@ export default function OnboardingScreen() {
           <Text className="text-white text-h3 mr-2 font-poppins-semibold">
             Get Started
           </Text>
-          <SymbolView
-            name="chevron.right"
-            size={24}
-            tintColor="white"
-            style={{ width: 24, height: 24 }}
-            fallback={
-              <Text className="text-white text-h3 font-poppins-medium">
-                &gt;
-              </Text>
-            }
-          />
+          <Ionicons name="chevron-forward" size={24} color="white" />
         </Pressable>
       </View>
     </SafeAreaView>
