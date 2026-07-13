@@ -3,12 +3,22 @@ import { Redirect, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { useLanguageStore } from "@/store/languageStore";
+
 export default function Index() {
   const { isSignedIn, isLoaded, signOut } = useAuth();
   const router = useRouter();
 
-  if (!isLoaded) return null;
+  const { selectedLanguage, isHydrating, clearLanguage } = useLanguageStore();
+
+  // Wait for Clerk and AsyncStorage to finish loading.
+  if (!isLoaded || isHydrating) return null;
+
+  // Not authenticated → onboarding
   if (!isSignedIn) return <Redirect href="/onboarding" />;
+
+  // Authenticated but no language chosen → language selection
+  if (!selectedLanguage) return <Redirect href="/language-select" />;
 
   return (
     <View className="flex-1 justify-center items-center bg-background px-4">
@@ -24,6 +34,14 @@ export default function Index() {
           Colors, typographies, and fonts are successfully configured.
         </Text>
 
+        {/* Selected language badge */}
+        <Text className="text-body-sm text-text-secondary mt-3">
+          Learning:{" "}
+          <Text className="text-lingua-purple font-poppins-semibold">
+            {selectedLanguage.name}
+          </Text>
+        </Text>
+
         {/* Language selection link */}
         <Pressable
           className="mt-4 bg-lingua-purple px-4 py-3 rounded-lg flex-row items-center justify-center"
@@ -37,9 +55,23 @@ export default function Index() {
             fallback={<Text className="text-white mr-2">🌍</Text>}
           />
           <Text className="text-body-lg text-background font-poppins-semibold">
-            Choose a Language
+            Change Language
           </Text>
         </Pressable>
+
+        {/* Clear AsyncStorage — for testing language selection flow */}
+        <Pressable
+          className="mt-3 px-4 py-3 rounded-lg items-center border border-border"
+          onPress={async () => {
+            await clearLanguage();
+            // After clearing, the guard above will redirect to language-select
+          }}
+        >
+          <Text className="text-body-lg text-text-secondary font-poppins-semibold">
+            Clear Language (Test)
+          </Text>
+        </Pressable>
+
         <Pressable
           className="mt-3 bg-error px-4 py-3 rounded-lg items-center"
           onPress={async () => {

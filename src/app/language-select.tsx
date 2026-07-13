@@ -5,6 +5,7 @@
 
 import { images } from "@/constants/images";
 import { languages } from "@/data/languages";
+import { useLanguageStore } from "@/store/languageStore";
 import { Language } from "@/types/learning";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -96,6 +97,8 @@ export default function LanguageSelectScreen() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Language | null>(null);
 
+  const setLanguage = useLanguageStore((s) => s.setLanguage);
+
   // Filter languages by search query
   const filtered = query.trim()
     ? languages.filter(
@@ -105,9 +108,9 @@ export default function LanguageSelectScreen() {
       )
     : languages;
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!selected) return;
-    // TODO: persist selection to Zustand store once language store is created
+    await setLanguage(selected);
     router.replace("/");
   }
 
