@@ -126,7 +126,10 @@ export function CustomTabBar({
               options.tabBarAccessibilityLabel ?? config.label
             }
             onPress={onPress}
-            style={styles.tabItem}
+            style={({ pressed }) => [
+              styles.tabItem,
+              pressed && { opacity: 0.6 },
+            ]}
           >
             {isFocused ? (
               // Active: white icon inside the floating circle (no label)
