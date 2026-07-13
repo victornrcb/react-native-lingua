@@ -1,7 +1,7 @@
 import { images } from "@/constants/images";
 import { useOAuth, useSignUp } from "@clerk/expo";
 import { Stack, useRouter } from "expo-router";
-import { SymbolView } from "expo-symbols";
+import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -207,13 +207,7 @@ export default function SignUpScreen() {
           onPress={() => router.back()}
           className="w-10 h-10 justify-center"
         >
-          <SymbolView
-            name="chevron.left"
-            size={24}
-            tintColor="#0D132B"
-            style={{ width: 24, height: 24 }}
-            fallback={<Text className="text-h2 text-text-primary">&lt;</Text>}
-          />
+          <Ionicons name="chevron-back" size={24} color="#0D132B" />
         </Pressable>
 
         <Text
@@ -268,15 +262,10 @@ export default function SignUpScreen() {
               />
             </View>
             <Pressable onPress={() => setShowPassword((prev) => !prev)}>
-              <SymbolView
-                name={showPassword ? "eye.slash" : "eye"}
+              <Ionicons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={20}
-                tintColor="#6B7280"
-                fallback={
-                  <Text className="text-text-secondary">
-                    {showPassword ? "🙈" : "👁"}
-                  </Text>
-                }
+                color="#6B7280"
               />
             </Pressable>
           </View>

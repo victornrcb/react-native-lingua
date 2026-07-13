@@ -8,7 +8,7 @@ import { languages } from "@/data/languages";
 import { useLanguageStore } from "@/store/languageStore";
 import { Language } from "@/types/learning";
 import { Stack, useRouter } from "expo-router";
-import { SymbolView } from "expo-symbols";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   FlatList,
@@ -65,26 +65,10 @@ function LanguageRow({ language, isSelected, onPress }: LanguageRowProps) {
       {/* Right indicator: checkmark when selected, chevron otherwise */}
       {isSelected ? (
         <View style={styles.checkCircle}>
-          <SymbolView
-            name="checkmark"
-            size={16}
-            tintColor="#FFFFFF"
-            style={{ width: 16, height: 16 }}
-            fallback={
-              <Text className="text-white text-body-sm font-poppins-semibold">
-                ✓
-              </Text>
-            }
-          />
+          <Ionicons name="checkmark" size={16} color="#FFFFFF" />
         </View>
       ) : (
-        <SymbolView
-          name="chevron.right"
-          size={20}
-          tintColor="#9CA3AF"
-          style={{ width: 20, height: 20 }}
-          fallback={<Text className="text-text-secondary text-body-md">›</Text>}
-        />
+        <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
       )}
     </Pressable>
   );
@@ -125,13 +109,7 @@ export default function LanguageSelectScreen() {
           style={styles.backButton}
           hitSlop={12}
         >
-          <SymbolView
-            name="chevron.left"
-            size={20}
-            tintColor="#0D132B"
-            style={{ width: 20, height: 20 }}
-            fallback={<Text className="text-text-primary text-body-lg">‹</Text>}
-          />
+          <Ionicons name="chevron-back" size={20} color="#0D132B" />
         </Pressable>
         <Text className="flex-1 text-center text-h3 text-text-primary">
           Choose a language
@@ -143,13 +121,7 @@ export default function LanguageSelectScreen() {
       {/* ── Search bar ─────────────────────────────────────────────────── */}
       <View className="px-5 mb-5">
         <View style={styles.searchBar}>
-          <SymbolView
-            name="magnifyingglass"
-            size={18}
-            tintColor="#9CA3AF"
-            style={{ width: 18, height: 18, marginRight: 8 }}
-            fallback={<Text className="text-text-secondary mr-2">🔍</Text>}
-          />
+          <Ionicons name="search" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
           <TextInput
             placeholder="Search languages"
             placeholderTextColor="#9CA3AF"
