@@ -186,8 +186,7 @@ export default function HomeScreen() {
             style={styles.palaceImg}
             contentFit="cover"
           />
-          {/* bannerOverlay — position absolute inset:0 → StyleSheet (inset not supported in NW v5) */}
-          <View style={styles.bannerOverlay}>
+          <View className="inset-0 flex-row">
             <View className="flex-1 pl-5 pt-5 pb-5 justify-end">
               {/* continueLabel → Text: full NativeWind support */}
               <Text
@@ -218,7 +217,10 @@ export default function HomeScreen() {
               </Text>
               {/* continueBtn — Pressable with pressed state → StyleSheet per AGENTS.md */}
               <Pressable
-                style={styles.continueBtn}
+                style={({ pressed }) => [
+                  styles.continueBtn,
+                  pressed && { opacity: 0.75 },
+                ]}
                 onPress={() => router.push("/(tabs)/learn")}
               >
                 {/* continueBtnText → Text: full NativeWind support */}
@@ -376,15 +378,6 @@ const styles = StyleSheet.create({
     width: 150,
     height: 160,
     opacity: 0.9,
-  },
-  // Absolute overlay — `inset` not supported in NativeWind v5
-  bannerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: "row",
   },
 
   // Pressable — AGENTS.md exception (pressed state)

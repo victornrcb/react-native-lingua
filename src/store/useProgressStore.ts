@@ -1,11 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // store/useProgressStore.ts
 // Zustand store for XP, streak, daily goal, and completed lessons.
-// Persisted to AsyncStorage so progress survives app restarts.
+// Persisted to AsyncStorage via Zustand's persist middleware — no manual
+// setItem calls, no race conditions between concurrent state updates.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 const STORAGE_KEY = "lingua:progress";
 
@@ -20,52 +22,40 @@ interface ProgressState {
   completedLessonIds: string[];
 
   // Actions
-  addXP: (amount: number) => Promise<void>;
-  completeLesson: (lessonId: string) => Promise<void>;
-  hydrate: () => Promise<void>;
+  addXP: (amount: number) => void;
+  completeLesson: (lessonId: string) => void;
 }
 
-export const useProgressStore = create<ProgressState>((set, get) => ({
-  todayXP: 15,
-  dailyGoalXP: 20,
-  streak: 12,
-  completedLessonIds: ["es-1-1-vocab"],
+export const useProgressStore = create<ProgressState>()(
+  persist(
+    (set, get) => ({
+      todayXP: 15,
+      dailyGoalXP: 20,
+      streak: 12,
+      completedLessonIds: ["es-1-1-vocab"],
 
-  addXP: async (amount) => {
-    const next = get().todayXP + amount;
-    set({ todayXP: next });
-    await AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ ...get(), todayXP: next }),
-    );
-  },
+      addXP: (amount) => {
+        set((state) => ({ todayXP: state.todayXP + amount }));
+      },
 
-  completeLesson: async (lessonId) => {
-    const ids = [...get().completedLessonIds];
-    if (!ids.includes(lessonId)) {
-      ids.push(lessonId);
-      set({ completedLessonIds: ids });
-      await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ ...get(), completedLessonIds: ids }),
-      );
-    }
-  },
-
-  hydrate: async () => {
-    try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const stored = JSON.parse(raw) as Partial<ProgressState>;
-        set({
-          todayXP: stored.todayXP ?? 15,
-          dailyGoalXP: stored.dailyGoalXP ?? 20,
-          streak: stored.streak ?? 12,
-          completedLessonIds: stored.completedLessonIds ?? ["es-1-1-vocab"],
-        });
-      }
-    } catch (e) {
-      console.error("[progressStore] Failed to hydrate:", e);
-    }
-  },
-}));
+      completeLesson: (lessonId) => {
+        if (!get().completedLessonIds.includes(lessonId)) {
+          set((state) => ({
+            completedLessonIds: [...state.completedLessonIds, lessonId],
+          }));
+        }
+      },
+    }),
+    {
+      name: STORAGE_KEY,
+      storage: createJSONStorage(() => AsyncStorage),
+      // Only persist the data fields, not the action functions
+      partialize: (state) => ({
+        todayXP: state.todayXP,
+        dailyGoalXP: state.dailyGoalXP,
+        streak: state.streak,
+        completedLessonIds: state.completedLessonIds,
+      }),
+    },
+  ),
+);
