@@ -1,3 +1,4 @@
+import { useLanguageStore } from "@/store/languageStore";
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import {
@@ -9,9 +10,8 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "../../global.css";
-import { useLanguageStore } from "@/store/languageStore";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -24,6 +24,7 @@ if (!publishableKey) {
 
 export default function RootLayout() {
   const hydrate = useLanguageStore((s) => s.hydrate);
+  const [isHydrating, setIsHydrating] = useState(true);
 
   const [loaded, error] = useFonts({
     Poppins_400Regular,
@@ -32,13 +33,15 @@ export default function RootLayout() {
     Poppins_700Bold,
   });
 
-  // Load persisted language selection from AsyncStorage once on mount.
+  // Hydrate the language store (progress store is handled by persist middleware).
   useEffect(() => {
-    hydrate();
+    hydrate().finally(() => {
+      setIsHydrating(false);
+    });
   }, []);
 
   useEffect(() => {
-    if (loaded || error) {
+    if ((loaded || error) && !isHydrating) {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
