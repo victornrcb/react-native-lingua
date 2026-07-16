@@ -337,28 +337,28 @@ export default function SignInScreen() {
                     <Text className="text-h2 text-text-primary">
                       {code[index] || ""}
                     </Text>
-                    <TextInput
-                      testID="sign-in-code"
-                      ref={inputRef}
-                      value={code}
-                      onChangeText={(text) => {
-                        const numericText = text.replace(/[^0-9]/g, "");
-                        if (numericText.length <= 6) handleCode(numericText);
-                      }}
-                      keyboardType="number-pad"
-                      maxLength={6}
-                      caretHidden
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        opacity: 0,
-                      }}
-                    />
                   </View>
                 ))}
+                <TextInput
+                  testID="sign-in-code"
+                  ref={inputRef}
+                  value={code}
+                  onChangeText={(text) => {
+                    const numericText = text.replace(/[^0-9]/g, "");
+                    if (numericText.length <= 6) handleCode(numericText);
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  caretHidden
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    opacity: 0,
+                  }}
+                />
               </Pressable>
             </View>
           </Animated.View>

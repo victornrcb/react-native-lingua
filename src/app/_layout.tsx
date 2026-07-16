@@ -1,5 +1,5 @@
-import { useLanguageStore } from "@/store/languageStore";
 import { posthog } from "@/lib/posthog";
+import { useLanguageStore } from "@/store/languageStore";
 import { ClerkProvider, useUser } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import {
@@ -9,9 +9,9 @@ import {
   Poppins_700Bold,
   useFonts,
 } from "@expo-google-fonts/poppins";
-import { Stack, usePathname, useGlobalSearchParams } from "expo-router";
-import { PostHogProvider } from "posthog-react-native";
+import { Stack, useGlobalSearchParams, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { PostHogProvider } from "posthog-react-native";
 import { useEffect, useRef, useState } from "react";
 import "../../global.css";
 
@@ -35,8 +35,10 @@ function ClerkPostHogSync() {
       posthog.identify(user.id, {
         $set: { name: user.firstName },
       });
+    } else {
+      posthog.reset();
     }
-  }, [user?.id, isLoaded]);
+  }, [user, isLoaded]);
 
   return null;
 }
@@ -90,7 +92,7 @@ export default function RootLayout() {
         autocapture={{
           captureScreens: false,
           captureTouches: true,
-          propsToCapture: ['testID'],
+          propsToCapture: ["testID"],
         }}
       >
         <ClerkPostHogSync />

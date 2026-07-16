@@ -38,9 +38,10 @@ instrument(server, posthog, {
       distinctId: user.id,              // becomes distinct_id
       properties: {                     // written to $set
         name: user.name,
-        email: user.email,
         plan: user.plan,
         signupDate: user.signupDate,
+        // email: user.email,           // only include when consent, retention,
+        //                              // and data-minimization requirements are met
       },
       groups: {                         // becomes $groups on every event
         organization: user.orgId,

@@ -135,7 +135,7 @@ instrument(server, posthog, {
 })
 ```
 
-The SDK emits a `$identify` event the first time it sees a new identity for a session, and PostHog's standard merge takes care of attributing prior anonymous activity.
+The SDK emits a `$identify` event whenever a session's identity changes — including the first time a new identity appears — and PostHog's standard merge takes care of attributing prior anonymous activity.
 
 [Identify users](/docs/mcp-analytics/identifying-users.md)
 
@@ -194,17 +194,9 @@ instrument(server, posthog, {
 
 ---
 
-That's it. You're ready to ship `@posthog/mcp` to production agents – within the beta caveats above.
+That's it — within the beta caveats noted at the top, you can begin using `@posthog/mcp` in your servers. Pin a specific version and plan to revisit when `1.0` ships. For the full event reference and dashboard setup:
 
 [Install MCP Analytics](/docs/mcp-analytics/installation.md)
-
-1/7
-
-[**Add @posthog/mcp to your MCP server** ***Required***](#quest-item-add-posthogmcp-to-your-mcp-server)[**See your first events** ***Required***](#quest-item-see-your-first-events)[**Capture what the agent was trying to do** ***Recommended***](#quest-item-capture-what-the-agent-was-trying-to-do)[**Build your first dashboard** ***Recommended***](#quest-item-build-your-first-dashboard)[**Identify the user behind the agent** ***Recommended***](#quest-item-identify-the-user-behind-the-agent)[**Find capability gaps with \`reportMissing\`** ***Recommended***](#quest-item-find-capability-gaps-with-reportmissing)[**Ship safely** ***Required***](#quest-item-ship-safely)
-
-**Add @posthog/mcp to your MCP server**
-
-***Required***
 
 ### Community questions
 

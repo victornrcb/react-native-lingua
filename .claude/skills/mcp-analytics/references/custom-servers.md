@@ -23,7 +23,8 @@ PostHog AI
 import { PostHogMCP } from "@posthog/mcp"
 const posthog = new PostHogMCP(process.env.POSTHOG_PROJECT_API_KEY, {
   host: "https://us.i.posthog.com", // or https://eu.i.posthog.com
-  // standard posthog-node options apply, e.g. beforeSend, enableExceptionAutocapture
+  enableExceptionAutocapture: true,
+  // standard posthog-node options apply, e.g. beforeSend
 })
 ```
 
@@ -133,7 +134,7 @@ posthog.capture_tool_call(
     name,
     intent=prepared.intent,
     intent_source=prepared.intent_source,
-    parameters=arguments,
+    parameters=prepared.args,
     response=result,
     duration_ms=elapsed_ms,
     is_error=False,

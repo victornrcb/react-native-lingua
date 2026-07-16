@@ -17,7 +17,7 @@ PostHog AI
 ```typescript
 instrument(server, posthog, {
   enableConversationId: true,
-})
+});
 ```
 
 With this on, the SDK does three things:
@@ -32,7 +32,7 @@ The agent's `conversation_id` (when present) always wins. The SDK only mints whe
 
 PostHog AI
 
-```
+```json
 {
   event: "$mcp_tool_call",
   properties: {
@@ -86,8 +86,8 @@ If your MCP server runs over a long-lived connection that already aligns with wh
 
 Turn it on when:
 
--   The same logical conversation crosses connections (HTTP/SSE clients that reconnect).
--   You want to correlate MCP events with a conversation id you already own elsewhere (chat platform, support ticket, JWT) and you're happy to plumb that id through the agent.
+- The same logical conversation crosses connections (HTTP/SSE clients that reconnect).
+- You want to correlate MCP events with a conversation id you already own elsewhere (chat platform, support ticket, JWT) and you're happy to plumb that id through the agent.
 
 ### Community questions
 

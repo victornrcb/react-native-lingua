@@ -85,8 +85,8 @@ Pick exactly one based on what STEP 1 found. When in doubt, read the bundled ref
 
 ### STEP 3: Install the SDK
 
-- **TypeScript / JavaScript:** install `@posthog/mcp` and `posthog-node` with the project's package manager, pinning `@posthog/mcp` to its current published version (it's pre-1.0) — e.g. `pnpm add @posthog/mcp@<latest> posthog-node`. Read the installed version back from `package.json` / the lockfile rather than guessing.
-- **Python:** the SDK ships inside `posthog`, so install (or require) `posthog>=7.21` with the project's installer — e.g. `pip install "posthog>=7.21"`, `uv add posthog`, `poetry add posthog`. The MCP SDK itself (`mcp` / `fastmcp`) is a peer dependency you already have — you built the server with it — so don't add it. A custom-dispatcher (path P2) project needs nothing beyond `posthog`.
+- **TypeScript / JavaScript:** install `@posthog/mcp` and `posthog-node` with the project's package manager, pinning `@posthog/mcp` to its current published version (it's pre-1.0) — e.g. `pnpm add --save-exact @posthog/mcp posthog-node`. Read the installed version back from `package.json` / the lockfile and record the exact version number (e.g. `@posthog/mcp@0.1.4`) rather than leaving it unpinned.
+- **Python:** the SDK ships inside `posthog`, so install (or require) the latest published `posthog` with the project's installer — e.g. `pip install --upgrade posthog`, `uv add posthog`, `poetry add posthog`. Record the exact resolved version from the lockfile (e.g. `posthog==7.21.0`) rather than using an open range. The MCP SDK itself (`mcp` / `fastmcp`) is a peer dependency you already have — you built the server with it — so don't add it. A custom-dispatcher (path P2) project needs nothing beyond `posthog`.
 
 ### STEP 4: Instrument the server
 
@@ -97,8 +97,9 @@ Create the PostHog client **once at module scope** (never per request), reading 
 ```ts
 import { PostHog } from "posthog-node"
 
-const posthog = new PostHog(process.env.POSTHOG_PROJECT_TOKEN, {
+const posthog = new PostHog(process.env.POSTHOG_PROJECT_API_KEY, {
   host: process.env.POSTHOG_HOST, // https://us.i.posthog.com or https://eu.i.posthog.com
+  enableExceptionAutocapture: true,
 })
 ```
 
@@ -130,8 +131,9 @@ const handler = createMcpHandler((server) => {
 ```ts
 import { PostHogMCP } from "@posthog/mcp"
 
-const posthog = new PostHogMCP(process.env.POSTHOG_PROJECT_TOKEN, {
+const posthog = new PostHogMCP(process.env.POSTHOG_PROJECT_API_KEY, {
   host: process.env.POSTHOG_HOST,
+  enableExceptionAutocapture: true,
 })
 
 // on the initialize handshake:
@@ -160,8 +162,9 @@ import { Module } from "@nestjs/common"
 import { McpModule } from "@rekog/mcp-nest"
 import { PostHog, instrumentMutator } from "@posthog/mcp"
 
-const posthog = new PostHog(process.env.POSTHOG_PROJECT_TOKEN, {
+const posthog = new PostHog(process.env.POSTHOG_PROJECT_API_KEY, {
   host: process.env.POSTHOG_HOST,
+  enableExceptionAutocapture: true,
 })
 
 @Module({
@@ -185,7 +188,7 @@ import os
 from posthog import Posthog
 
 posthog = Posthog(
-    os.environ["POSTHOG_PROJECT_TOKEN"],
+    os.environ["POSTHOG_PROJECT_API_KEY"],
     host=os.environ["POSTHOG_HOST"],  # https://us.i.posthog.com or https://eu.i.posthog.com
 )
 ```
@@ -208,7 +211,7 @@ analytics = instrument(server, posthog)  # wrap right after constructing the ser
 import time
 from posthog.mcp import PostHogMCP
 
-posthog = PostHogMCP(os.environ["POSTHOG_PROJECT_TOKEN"], host=os.environ["POSTHOG_HOST"])
+posthog = PostHogMCP(os.environ["POSTHOG_PROJECT_API_KEY"], host=os.environ["POSTHOG_HOST"])
 
 # on the initialize handshake:
 posthog.capture_initialize(client_name=client_name, client_version=client_version, distinct_id=distinct_id)
@@ -234,7 +237,7 @@ Resolve `distinct_id` / `session_id` from whatever auth/session the dispatcher a
 - Check existing env files (`.env`, `.env.local`, etc.) for a PostHog project token. If a valid `phc_…` token and host are already set, reference those and skip the rest of this step.
 - If the token is missing, use the PostHog MCP server's `projects-get` tool to fetch the project's `api_token`. If multiple projects come back, ask the user which to use. If the MCP server isn't connected, ask the user for their project token directly.
 - Host: `https://us.i.posthog.com` for US Cloud, `https://eu.i.posthog.com` for EU Cloud.
-- Write `POSTHOG_PROJECT_TOKEN` and `POSTHOG_HOST` to the appropriate env file and reference them in code (`process.env.*` in JS, `os.environ[...]` in Python) — never hardcode the token.
+- Write `POSTHOG_PROJECT_API_KEY` and `POSTHOG_HOST` to the appropriate env file and reference them in code (`process.env.*` in JS, `os.environ[...]` in Python) — never hardcode the token.
 
 ### STEP 6: Ensure events get flushed
 
@@ -286,4 +289,4 @@ The PostHog client batches events; the user owns the client's lifecycle.
 - **Env, never hardcode.** The project token and host come from environment variables.
 - **Additive only.** Don't change tool behavior or restructure the server — just wrap/capture.
 - **Don't break STDIO.** No `console.*` (JS) or `print()` (Python) on STDIO transports; use a `logger` instead.
-- **Pin the beta SDK** and tell the user it's pre-1.0. (Python: `posthog.mcp` ships inside `posthog`; pin `posthog>=7.21`.)
+- **Pin the beta SDK** and tell the user it's pre-1.0. (Python: `posthog.mcp` ships inside `posthog`; pin the exact resolved version.)

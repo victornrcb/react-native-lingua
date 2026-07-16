@@ -27,9 +27,9 @@ Terminal
 PostHog AI
 
 ```bash
-npm install @posthog/mcp posthog-node
-# or pnpm add @posthog/mcp posthog-node
-# or yarn add @posthog/mcp posthog-node
+npm install --save-exact @posthog/mcp posthog-node
+# or pnpm add --save-exact @posthog/mcp posthog-node
+# or yarn add --exact @posthog/mcp posthog-node
 ```
 
 You bring your own [`posthog-node`](/docs/libraries/node.md) client (the same pattern as [`@posthog/ai`](/docs/ai-engineering.md)) and pass it to `instrument()` as the required second argument. You own its lifecycle — call `posthog.shutdown()` or `posthog.flush()` yourself.
@@ -53,6 +53,7 @@ import { instrument } from "@posthog/mcp"
 const server = new Server({ name: "my-mcp-server", version: "1.0.0" })
 const posthog = new PostHog(process.env.POSTHOG_PROJECT_API_KEY, {
   host: "https://us.i.posthog.com", // or https://eu.i.posthog.com
+  enableExceptionAutocapture: true,
 })
 // register your tools as usual...
 const analytics = instrument(server, posthog)
@@ -73,6 +74,7 @@ import { instrument } from "@posthog/mcp"
 const server = new McpServer({ name: "my-mcp-server", version: "1.0.0" })
 const posthog = new PostHog(process.env.POSTHOG_PROJECT_API_KEY, {
   host: "https://us.i.posthog.com",
+  enableExceptionAutocapture: true,
 })
 const analytics = instrument(server, posthog)
 server.tool("search_events", { /* ... */ }, async (args) => {
@@ -94,6 +96,7 @@ import { PostHog, instrument } from "@posthog/mcp"
 // Create the client once at module scope (not per request).
 const posthog = new PostHog(process.env.POSTHOG_PROJECT_API_KEY, {
   host: "https://us.i.posthog.com", // or https://eu.i.posthog.com
+  enableExceptionAutocapture: true,
 })
 const handler = createMcpHandler(
   (server) => {
@@ -143,6 +146,7 @@ import { PostHog, instrumentMutator } from "@posthog/mcp"
 // Create the client once at module scope.
 const posthog = new PostHog(process.env.POSTHOG_PROJECT_API_KEY, {
   host: "https://us.i.posthog.com", // or https://eu.i.posthog.com
+  enableExceptionAutocapture: true,
 })
 @Module({
   imports: [
@@ -181,7 +185,7 @@ Terminal
 PostHog AI
 
 ```bash
-pip install posthog
+pip install posthog  # pin the resolved version in your lockfile, e.g. posthog==7.21.0
 ```
 
 `instrument()` needs the MCP SDK at runtime, but you already have it — you built your server with `mcp` or `fastmcp`, so it's treated as a peer dependency rather than bundled. (`PostHogMCP` for custom dispatchers needs nothing beyond `posthog`.)

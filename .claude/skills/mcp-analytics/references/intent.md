@@ -1,6 +1,6 @@
 # Capturing agent intent - Docs
 
-Knowing *what* a tool was called is one thing. Knowing *why* the agent called it is what makes MCP Analytics useful for product decisions.
+Knowing _what_ a tool was called is one thing. Knowing _why_ the agent called it is what makes MCP Analytics useful for product decisions.
 
 The SDK captures intent as a single property — `$mcp_intent` — that can come from one of two sources:
 
@@ -42,14 +42,14 @@ PostHog AI
 ```typescript
 server.tool("search_events", schema, async (args) => {
   // args.context has been stripped — only your real arguments are here
-})
+});
 ```
 
 What lands in PostHog as `$mcp_intent`:
 
 PostHog AI
 
-```
+```text
 "Finding the last 10 pageviews for user alice@example.com to triage a drop in conversion"
 ```
 
@@ -64,9 +64,10 @@ PostHog AI
 ```typescript
 instrument(server, posthog, {
   context: {
-    description: "Describe the user's underlying goal in one sentence — not the tool you're calling.",
+    description:
+      "Describe the user's underlying goal in one sentence — not the tool you're calling.",
   },
-})
+});
 ```
 
 ### Disabling the injected argument
@@ -75,7 +76,7 @@ Set `context: false` if you don't want the SDK to touch your tool schemas at all
 
 ## The `intentFallback` callback
 
-The `context` argument is *advertised* as required in JSON Schema but isn't enforced at the SDK validation layer. A client that ignores the schema hint (raw cURL, in-house agents, schema-blind crawlers) will still succeed — the call lands in PostHog with `$mcp_intent` empty.
+The `context` argument is _advertised_ as required in JSON Schema but isn't enforced at the SDK validation layer. A client that ignores the schema hint (raw cURL, in-house agents, schema-blind crawlers) will still succeed — the call lands in PostHog with `$mcp_intent` empty.
 
 `intentFallback` is the escape hatch. The SDK calls it whenever no `context` argument is present, takes whatever non-empty string you return, and stamps it as `$mcp_intent` with `$mcp_intent_source = "inferred"`.
 
@@ -92,12 +93,12 @@ PostHog AI
 ```typescript
 instrument(server, posthog, {
   intentFallback: (request) => {
-    const tool = request.params?.name
-    const args = request.params?.arguments ?? {}
-    if (tool === "search_events") return `Searching events for "${args.query}"`
-    return tool ? `Invoking ${tool}` : null
+    const tool = request.params?.name;
+    const args = request.params?.arguments ?? {};
+    if (tool === "search_events") return `Searching events for "${args.query}"`;
+    return tool ? `Invoking ${tool}` : null;
   },
-})
+});
 ```
 
 ### Using transport metadata
@@ -110,9 +111,9 @@ PostHog AI
 
 ```typescript
 intentFallback: (request, extra) => {
-  const ua = extra?.requestInfo?.headers?.["user-agent"]
-  return `${ua ?? "unknown client"} invoked ${request.params?.name}`
-}
+  const ua = extra?.requestInfo?.headers?.["user-agent"];
+  return `${ua ?? "unknown client"} invoked ${request.params?.name}`;
+};
 ```
 
 ### LLM-derived intent
@@ -126,11 +127,11 @@ PostHog AI
 ```typescript
 intentFallback: async (request) => {
   try {
-    return await summariseIntent(request.params)
+    return await summariseIntent(request.params);
   } catch {
-    return null // the SDK swallows null gracefully
+    return null; // the SDK swallows null gracefully
   }
-}
+};
 ```
 
 ## Filtering on intent source
@@ -160,7 +161,7 @@ A high share of `inferred` means most of your callers are ignoring the schema hi
 
 ## Gotchas
 
-**\`get\_more\_tools\` reports its source as \`context\_parameter\`**
+**\`get_more_tools\` reports its source as \`context_parameter\`**
 
 The virtual `get_more_tools` tool (enabled by `reportMissing: true`) always reports `$mcp_intent_source = "context_parameter"`, even though the SDK is what defined the schema. Defensible — the agent did type a string — but filter it out of source-attribution queries if the number matters.
 
