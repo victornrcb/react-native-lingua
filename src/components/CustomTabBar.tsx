@@ -120,6 +120,7 @@ export function CustomTabBar({
         return (
           <Pressable
             key={route.key}
+            testID={`${route.key}-navigation-button`}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={

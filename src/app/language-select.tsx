@@ -5,10 +5,11 @@
 
 import { images } from "@/constants/images";
 import { languages } from "@/data/languages";
+import { posthog } from "@/lib/posthog";
 import { useLanguageStore } from "@/store/languageStore";
 import { Language } from "@/types/learning";
-import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   FlatList,
@@ -95,6 +96,10 @@ export default function LanguageSelectScreen() {
   async function handleConfirm() {
     if (!selected) return;
     await setLanguage(selected);
+    posthog.capture("language_selected", {
+      language_code: selected.code,
+      language_name: selected.name,
+    });
     router.replace("/");
   }
 
@@ -121,7 +126,12 @@ export default function LanguageSelectScreen() {
       {/* ── Search bar ─────────────────────────────────────────────────── */}
       <View className="px-5 mb-5">
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
+          <Ionicons
+            name="search"
+            size={18}
+            color="#9CA3AF"
+            style={{ marginRight: 8 }}
+          />
           <TextInput
             placeholder="Search languages"
             placeholderTextColor="#9CA3AF"
@@ -156,6 +166,7 @@ export default function LanguageSelectScreen() {
       {/* ── Confirm button ──────────────────────────────────────────────── */}
       <View className="px-5 pt-3 bg-background">
         <Pressable
+          testID="language-confirm-button"
           onPress={handleConfirm}
           disabled={!selected}
           style={[

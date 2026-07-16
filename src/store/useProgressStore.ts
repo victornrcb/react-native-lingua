@@ -7,6 +7,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { posthog } from "@/lib/posthog";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 const STORAGE_KEY = "lingua:progress";
@@ -36,6 +37,7 @@ export const useProgressStore = create<ProgressState>()(
 
       addXP: (amount) => {
         set((state) => ({ todayXP: state.todayXP + amount }));
+        posthog.capture('xp_earned', { amount, total_today: get().todayXP + amount });
       },
 
       completeLesson: (lessonId) => {
@@ -43,6 +45,7 @@ export const useProgressStore = create<ProgressState>()(
           set((state) => ({
             completedLessonIds: [...state.completedLessonIds, lessonId],
           }));
+          posthog.capture('lesson_completed', { lesson_id: lessonId });
         }
       },
     }),

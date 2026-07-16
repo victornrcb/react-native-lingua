@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { posthog } from "@/lib/posthog";
 import { images } from "@/constants/images";
 import { getLanguageByCode } from "@/data/languages";
 import { allLessons } from "@/data/lessons";
@@ -221,7 +222,14 @@ export default function HomeScreen() {
                   styles.continueBtn,
                   pressed && { opacity: 0.75 },
                 ]}
-                onPress={() => router.push("/(tabs)/learn")}
+                onPress={() => {
+                  posthog.capture('lesson_continued', {
+                    language: language.name,
+                    unit_order: currentUnit?.order ?? 1,
+                    lesson_id: currentLesson?.id ?? null,
+                  });
+                  router.push("/(tabs)/learn");
+                }}
               >
                 {/* continueBtnText → Text: full NativeWind support */}
                 <Text
@@ -258,7 +266,13 @@ export default function HomeScreen() {
                 styles.planRow,
                 pressed && { opacity: 0.75 },
               ]}
-              onPress={() => {}}
+              onPress={() => {
+                posthog.capture('plan_item_tapped', {
+                  item_id: item.id,
+                  item_title: item.title,
+                  is_done: item.done,
+                });
+              }}
             >
               {/* planIconBox — dynamic backgroundColor (runtime value) → StyleSheet */}
               <View

@@ -1,0 +1,52 @@
+[
+  {
+    "event_name": "onboarding_get_started",
+    "event_description": "User taps the Get Started button on the onboarding screen, entering the sign-up funnel.",
+    "file": "src/app/onboarding.tsx"
+  },
+  {
+    "event_name": "user_signed_up",
+    "event_description": "User successfully completes account creation via email verification code.",
+    "file": "src/app/(auth)/sign-up.tsx"
+  },
+  {
+    "event_name": "oauth_sign_up_completed",
+    "event_description": "User completes an OAuth registration flow (Google, Facebook, or Apple) from the sign-up screen.",
+    "file": "src/app/(auth)/sign-up.tsx"
+  },
+  {
+    "event_name": "user_signed_in",
+    "event_description": "User successfully signs in via email verification code.",
+    "file": "src/app/(auth)/sign-in.tsx"
+  },
+  {
+    "event_name": "oauth_sign_in_completed",
+    "event_description": "User completes an OAuth login flow (Google, Facebook, or Apple) from the sign-in screen.",
+    "file": "src/app/(auth)/sign-in.tsx"
+  },
+  {
+    "event_name": "language_selected",
+    "event_description": "User confirms their chosen learning language on the language selection screen.",
+    "file": "src/app/language-select.tsx"
+  },
+  {
+    "event_name": "lesson_continued",
+    "event_description": "User taps the Continue button on the home screen banner to continue their current lesson.",
+    "file": "src/app/(tabs)/home.tsx"
+  },
+  {
+    "event_name": "plan_item_tapped",
+    "event_description": "User taps a Today's Plan activity item on the home screen.",
+    "file": "src/app/(tabs)/home.tsx"
+  },
+  {
+    "event_name": "xp_earned",
+    "event_description": "User earns XP points, indicating active learning engagement.",
+    "file": "src/store/useProgressStore.ts"
+  },
+  {
+    "event_name": "lesson_completed",
+    "event_description": "User completes a lesson, the primary outcome metric for the app.",
+    "file": "src/store/useProgressStore.ts"
+  }
+]

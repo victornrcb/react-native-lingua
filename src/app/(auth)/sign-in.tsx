@@ -1,7 +1,8 @@
 import { images } from "@/constants/images";
+import { posthog } from "@/lib/posthog";
 import { useOAuth, useSignIn } from "@clerk/expo";
-import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -64,6 +65,7 @@ export default function SignInScreen() {
         }
 
         if (signIn!.status === "complete") {
+          posthog.capture("user_signed_in", { sign_in_method: "email" });
           await signIn!.finalize({
             navigate: () => router.replace("/"),
           });
@@ -88,6 +90,7 @@ export default function SignInScreen() {
       const { createdSessionId, setActive } = await flow();
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
+        posthog.capture("oauth_sign_in_completed", { provider: strategy });
         router.replace("/");
       }
     } catch (err) {
@@ -241,6 +244,7 @@ export default function SignInScreen() {
           <Pressable
             onPress={() => handleOAuth("oauth_google")}
             className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center"
+            testID="google-oauth-sign-in"
           >
             <Text className="font-poppins-bold text-[#EA4335] text-[20px] absolute left-6">
               G
@@ -334,6 +338,7 @@ export default function SignInScreen() {
                       {code[index] || ""}
                     </Text>
                     <TextInput
+                      testID="sign-in-code"
                       ref={inputRef}
                       value={code}
                       onChangeText={(text) => {
