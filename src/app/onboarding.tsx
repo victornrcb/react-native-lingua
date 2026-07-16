@@ -1,7 +1,8 @@
 import { images } from "@/constants/images";
+import { posthog } from "@/lib/posthog";
 import { useAuth } from "@clerk/expo";
-import { Redirect, Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Redirect, Stack, useRouter } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -72,8 +73,12 @@ export default function OnboardingScreen() {
       {/* Footer Area */}
       <View className="px-6 pb-8">
         <Pressable
+          testID="get-started-onboarding-button"
           className="bg-lingua-purple py-4 rounded-2xl flex-row justify-center items-center"
-          onPress={() => router.push("/sign-up")}
+          onPress={() => {
+            posthog.capture("onboarding_get_started");
+            router.push("/sign-up");
+          }}
         >
           <Text className="text-white text-h3 mr-2 font-poppins-semibold">
             Get Started

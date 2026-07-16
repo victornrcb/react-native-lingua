@@ -1,7 +1,8 @@
 import { images } from "@/constants/images";
+import { posthog } from "@/lib/posthog";
 import { useOAuth, useSignUp } from "@clerk/expo";
-import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -84,6 +85,7 @@ export default function SignUpScreen() {
         }
 
         if (signUp!.status === "complete") {
+          posthog.capture("user_signed_up", { sign_up_method: "email" });
           await signUp!.finalize({
             navigate: () => router.replace("/"),
           });
@@ -145,6 +147,7 @@ export default function SignUpScreen() {
       const { createdSessionId, setActive } = await flow();
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
+        posthog.capture("oauth_sign_up_completed", { provider: strategy });
         router.replace("/");
       }
     } catch (err) {
@@ -162,7 +165,9 @@ export default function SignUpScreen() {
         password,
       });
       if (createError) {
-        setError(createError.message ?? "Something went wrong. Please try again.");
+        setError(
+          createError.message ?? "Something went wrong. Please try again.",
+        );
         console.error("Sign up create error:", createError.message);
         return;
       }
@@ -177,7 +182,9 @@ export default function SignUpScreen() {
       setShowModal(true);
     } catch (err: unknown) {
       const clerkError = err as { errors?: { message: string }[] };
-      const message = clerkError?.errors?.[0]?.message ?? "Something went wrong. Please try again.";
+      const message =
+        clerkError?.errors?.[0]?.message ??
+        "Something went wrong. Please try again.";
       setError(message);
       console.error("Sign-up error:", JSON.stringify(err, null, 2));
     }
@@ -298,6 +305,7 @@ export default function SignUpScreen() {
 
         <View>
           <Pressable
+            testID="google-oauth-sign-up"
             onPress={() => handleOAuth("oauth_google")}
             className="border border-border py-3.5 rounded-2xl flex-row justify-center items-center"
           >
@@ -392,27 +400,28 @@ export default function SignUpScreen() {
                     <Text className="text-h2 text-text-primary">
                       {code[index] || ""}
                     </Text>
-                    <TextInput
-                      ref={inputRef}
-                      value={code}
-                      onChangeText={(text) => {
-                        const numericText = text.replace(/[^0-9]/g, "");
-                        if (numericText.length <= 6) handleCode(numericText);
-                      }}
-                      keyboardType="number-pad"
-                      maxLength={6}
-                      caretHidden
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        opacity: 0,
-                      }}
-                    />
                   </View>
                 ))}
+                <TextInput
+                  testID="sign-up-code"
+                  ref={inputRef}
+                  value={code}
+                  onChangeText={(text) => {
+                    const numericText = text.replace(/[^0-9]/g, "");
+                    if (numericText.length <= 6) handleCode(numericText);
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  caretHidden
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    opacity: 0,
+                  }}
+                />
               </Pressable>
             </View>
           </Animated.View>
