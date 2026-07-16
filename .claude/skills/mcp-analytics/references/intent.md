@@ -76,7 +76,7 @@ Set `context: false` if you don't want the SDK to touch your tool schemas at all
 
 ## The `intentFallback` callback
 
-The `context` argument is _advertised_ as required in JSON Schema but isn't enforced at the SDK validation layer. A client that ignores the schema hint (raw cURL, in-house agents, schema-blind crawlers) will still succeed — the call lands in PostHog with `$mcp_intent` empty.
+The `context` argument is _advertised_ as required in JSON Schema but isn't enforced at the SDK validation layer. A client that ignores the schema hint (raw cURL, in-house agents, schema-blind crawlers) will still succeed — the call lands in PostHog with both `$mcp_intent` and `$mcp_intent_source` absent from the event.
 
 `intentFallback` is the escape hatch. The SDK calls it whenever no `context` argument is present, takes whatever non-empty string you return, and stamps it as `$mcp_intent` with `$mcp_intent_source = "inferred"`.
 

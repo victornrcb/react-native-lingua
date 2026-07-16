@@ -1,6 +1,6 @@
 # Event and property reference - Docs
 
-This page is the wire-level contract for the `@posthog/mcp` SDK. Every event the SDK emits and every property name it uses is listed here. MCP-specific properties use the `$mcp_*` prefix so they never collide with PostHog autocapture, Web analytics, or other product events.
+This page is the wire-level contract for the `@posthog/mcp` SDK. Every event the SDK emits and every property name it uses is listed here. MCP-specific properties are namespaced so they never collide with PostHog autocapture, Web analytics, or other product events.
 
 ## Events
 
