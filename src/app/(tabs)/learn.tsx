@@ -8,13 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { LessonCard, LessonStatus } from "@/components/LessonCard";
@@ -23,7 +17,7 @@ import { getLessonsForUnit } from "@/data/lessons";
 import { unitsByLanguage } from "@/data/units";
 import { useLanguageStore } from "@/store/languageStore";
 import { useProgressStore } from "@/store/useProgressStore";
-import type { Lesson, LanguageCode, Unit } from "@/types/learning";
+import type { LanguageCode, Lesson, Unit } from "@/types/learning";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -36,10 +30,7 @@ export default function LearnScreen() {
   const { completedLessonIds } = useProgressStore();
 
   const langCode = (selectedLanguage?.code ?? "es") as LanguageCode;
-  const units = useMemo(
-    () => unitsByLanguage[langCode] ?? [],
-    [langCode],
-  );
+  const units = useMemo(() => unitsByLanguage[langCode] ?? [], [langCode]);
 
   // Active unit index — default to first unit
   const [activeUnitIndex, setActiveUnitIndex] = useState(0);
@@ -86,13 +77,18 @@ export default function LearnScreen() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  // if (!selectedLanguage) return <Redirect href="/language-select" />
+
   if (units.length === 0) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>No lessons yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Lessons for this language are coming soon. Switch to another language to continue learning.
+        <View className="flex-1 items-center justify-center px-8">
+          <Text className="font-[Poppins_700Bold] text-[22px] text-[#0D132B] mb-2">
+            No lessons yet
+          </Text>
+          <Text className="font-[Poppins_400Regular] text-[14px] text-[#6B7280] text-center mb-6">
+            Lessons for this language are coming soon. Switch to another
+            language to continue learning.
           </Text>
           <Pressable
             style={styles.selectLangBtn}
@@ -101,7 +97,9 @@ export default function LearnScreen() {
               router.push("/language-select");
             }}
           >
-            <Text style={styles.selectLangBtnText}>Change Language</Text>
+            <Text className="font-[Poppins_600SemiBold] text-[15px] text-white">
+              Change Language
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -138,13 +136,16 @@ export default function LearnScreen() {
               <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
             </Pressable>
 
-            <View style={styles.bannerTitleBlock}>
-              <Text style={styles.bannerTitle} numberOfLines={1}>
+            <View className="flex-1">
+              <Text
+                className="font-[Poppins_700Bold] text-[20px] text-white leading-[26px]"
+                numberOfLines={1}
+              >
                 {activeUnit?.title ?? ""}
               </Text>
-              <Text style={styles.bannerSubtitle}>
-                Unit {activeUnitIndex + 1} • {completedCount} /{" "}
-                {lessons.length} lessons
+              <Text className="font-[Poppins_400Regular] text-[13px] text-white/85 mt-0.5">
+                Unit {activeUnitIndex + 1} • {completedCount} {lessons.length}{" "}
+                lessons
               </Text>
             </View>
 
@@ -181,12 +182,9 @@ export default function LearnScreen() {
                   setActiveTab("lessons");
                 }}
               >
-                <Text style={styles.unitPillIcon}>{unit.icon}</Text>
+                <Text className="text-[14px]">{unit.icon}</Text>
                 <Text
-                  style={[
-                    styles.unitPillText,
-                    idx === activeUnitIndex && styles.unitPillTextActive,
-                  ]}
+                  className={`font-[Poppins_500Medium] text-[13px] max-w-[120px] ${idx === activeUnitIndex ? "text-[#6C4EF5]" : "text-[#6B7280]"}`}
                   numberOfLines={1}
                 >
                   {unit.title}
@@ -197,18 +195,15 @@ export default function LearnScreen() {
         )}
 
         {/* ── Lessons / Practice tab bar ─────────────────────────────────── */}
-        <View style={styles.tabBar}>
+        <View className="flex-row bg-white px-5 mb-1 border-b border-[#F3F4F6]">
           {(["lessons", "practice"] as TabKey[]).map((tab) => (
             <Pressable
               key={tab}
-              style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}
+              style={styles.tabItem}
               onPress={() => setActiveTab(tab)}
             >
               <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.tabTextActive,
-                ]}
+                className={`text-[15px] ${activeTab === tab ? "font-[Poppins_600SemiBold] text-[#6C4EF5]" : "font-[Poppins_500Medium] text-[#6B7280]"}`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
@@ -218,7 +213,7 @@ export default function LearnScreen() {
         </View>
 
         {/* ── Lesson list ─────────────────────────────────────────────────── */}
-        <View style={styles.lessonList}>
+        <View className="px-4 pt-3">
           {activeTab === "lessons" ? (
             lessons.length > 0 ? (
               lessons.map((lesson, idx) => (
@@ -233,18 +228,20 @@ export default function LearnScreen() {
                 />
               ))
             ) : (
-              <View style={styles.emptyLessons}>
-                <Text style={styles.emptyLessonsText}>
+              <View className="items-center py-8">
+                <Text className="font-[Poppins_400Regular] text-[14px] text-[#9CA3AF]">
                   No lessons in this unit yet.
                 </Text>
               </View>
             )
           ) : (
             /* ── Practice tab placeholder ──────────────────────────────── */
-            <View style={styles.practicePlaceholder}>
-              <Text style={styles.practiceEmoji}>🏋️</Text>
-              <Text style={styles.practiceTitle}>Practice Mode</Text>
-              <Text style={styles.practiceSubtitle}>
+            <View className="items-center py-12 px-6">
+              <Text className="text-[52px] mb-3">🏋️</Text>
+              <Text className="font-[Poppins_600SemiBold] text-[18px] text-[#0D132B] mb-2">
+                Practice Mode
+              </Text>
+              <Text className="font-[Poppins_400Regular] text-[14px] text-[#6B7280] text-center leading-[22px]">
                 Coming soon — review vocabulary and sharpen your skills.
               </Text>
             </View>
@@ -301,21 +298,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 10,
   },
-  bannerTitleBlock: {
-    flex: 1,
-  },
-  bannerTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 20,
-    color: "#FFFFFF",
-    lineHeight: 26,
-  },
-  bannerSubtitle: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
-    color: "rgba(255,255,255,0.85)",
-    marginTop: 2,
-  },
   bookmarkBtn: {
     width: 36,
     height: 36,
@@ -357,43 +339,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0EDFF",
     borderColor: "#6C4EF5",
   },
-  unitPillIcon: {
-    fontSize: 14,
-  },
-  unitPillText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 13,
-    color: "#6B7280",
-    maxWidth: 120,
-  },
-  unitPillTextActive: {
-    color: "#6C4EF5",
-  },
 
   // ── Tab bar ───────────────────────────────────────────────────────────────
-  tabBar: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
-    marginBottom: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
   tabItem: {
     flex: 1,
     alignItems: "center",
     paddingVertical: 14,
     position: "relative",
-  },
-  tabItemActive: {},
-  tabText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 15,
-    color: "#6B7280",
-  },
-  tabTextActive: {
-    fontFamily: "Poppins_600SemiBold",
-    color: "#6C4EF5",
   },
   tabUnderline: {
     position: "absolute",
@@ -405,76 +357,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#6C4EF5",
   },
 
-  // ── Lesson list ───────────────────────────────────────────────────────────
-  lessonList: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
-
-  // ── Practice placeholder ──────────────────────────────────────────────────
-  practicePlaceholder: {
-    alignItems: "center",
-    paddingVertical: 48,
-    paddingHorizontal: 24,
-  },
-  practiceEmoji: {
-    fontSize: 52,
-    marginBottom: 12,
-  },
-  practiceTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 18,
-    color: "#0D132B",
-    marginBottom: 8,
-  },
-  practiceSubtitle: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-
-  // ── Empty lessons ─────────────────────────────────────────────────────────
-  emptyLessons: {
-    alignItems: "center",
-    paddingVertical: 32,
-  },
-  emptyLessonsText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-
   // ── Empty state (no language selected) ───────────────────────────────────
-  emptyState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 22,
-    color: "#0D132B",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    marginBottom: 24,
-  },
   selectLangBtn: {
     backgroundColor: "#6C4EF5",
     paddingHorizontal: 28,
     paddingVertical: 14,
     borderRadius: 14,
-  },
-  selectLangBtnText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-    color: "#FFFFFF",
   },
 });

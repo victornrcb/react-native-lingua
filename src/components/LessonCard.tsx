@@ -15,7 +15,7 @@ export type LessonStatus = "completed" | "in_progress" | "locked" | "available";
 
 interface Props {
   lesson: Lesson;
-  index: number;           // 1-based lesson number
+  index: number; // 1-based lesson number
   status: LessonStatus;
   onPress: () => void;
 }
@@ -43,17 +43,15 @@ export function LessonCard({ lesson, index, status, onPress }: Props) {
         pressed && styles.cardPressed,
       ]}
     >
-      <View style={styles.left}>
+      <View className="flex-1 pr-3">
         {/* Lesson number + title */}
-        <Text style={[styles.lessonNumber, isInProgress && styles.lessonNumberActive]}>
+        <Text
+          className={`text-[12px] mb-0.5 ${isInProgress ? "font-[Poppins_600SemiBold] text-[#6C4EF5]" : "font-[Poppins_400Regular] text-[#6B7280]"}`}
+        >
           Lesson {index}
         </Text>
         <Text
-          style={[
-            styles.lessonTitle,
-            isInProgress && styles.lessonTitleActive,
-            isLocked && styles.lessonTitleLocked,
-          ]}
+          className={`font-[Poppins_600SemiBold] text-[15px] ${isLocked ? "text-[#6B7280]" : "text-[#0D132B]"}`}
           numberOfLines={1}
         >
           {lesson.title}
@@ -61,22 +59,26 @@ export function LessonCard({ lesson, index, status, onPress }: Props) {
 
         {/* Sub-info row */}
         {isInProgress && (
-          <Text style={styles.inProgressLabel}>In progress</Text>
+          <Text className="font-[Poppins_400Regular] text-[12px] text-[#6C4EF5] mt-0.5">
+            In progress
+          </Text>
         )}
         {isLocked && (
-          <Text style={styles.subLabel}>0 / {lesson.activities.length} lessons</Text>
+          <Text className="font-[Poppins_400Regular] text-[12px] text-[#9CA3AF] mt-0.5">
+            0 / {lesson.activities.length} activities
+          </Text>
         )}
       </View>
 
       {/* Right indicator */}
-      <View style={styles.right}>
+      <View className="items-center justify-center min-w-[32px]">
         {isCompleted && (
-          <View style={styles.completedBadge}>
+          <View className="w-8 h-8 items-center justify-center">
             <Ionicons name="checkmark-circle" size={28} color="#21C16B" />
           </View>
         )}
         {isInProgress && (
-          <Text style={styles.progressEmoji}>
+          <Text className="text-[28px]">
             {LESSON_TYPE_EMOJI[lesson.type] ?? "📖"}
           </Text>
         )}
@@ -117,56 +119,5 @@ const styles = StyleSheet.create({
   cardPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.99 }],
-  },
-  left: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  lessonNumber: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "#6B7280",
-    marginBottom: 2,
-  },
-  lessonNumberActive: {
-    color: "#6C4EF5",
-    fontFamily: "Poppins_600SemiBold",
-  },
-  lessonTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-    color: "#0D132B",
-  },
-  lessonTitleActive: {
-    color: "#0D132B",
-  },
-  lessonTitleLocked: {
-    color: "#6B7280",
-  },
-  inProgressLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "#6C4EF5",
-    marginTop: 2,
-  },
-  subLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 2,
-  },
-  right: {
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 32,
-  },
-  completedBadge: {
-    width: 32,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  progressEmoji: {
-    fontSize: 28,
   },
 });

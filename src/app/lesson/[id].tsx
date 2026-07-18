@@ -8,13 +8,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Animated,
   Easing,
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -67,8 +68,9 @@ const TEACHER_MESSAGES = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 function usePulse(active: boolean) {
-  const scale = useRef(new Animated.Value(1)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  // Lazy initialisers give stable Animated.Value identities without useRef.
+  const [scale] = useState(() => new Animated.Value(1));
+  const [opacity] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (active) {
@@ -115,6 +117,7 @@ export default function LessonScreen() {
   });
 
   const { scale: micPulseScale, opacity: micPulseOpacity } = usePulse(isMicOn);
+  const { width: windowWidth } = useWindowDimensions();
 
   // Session timer
   useEffect(() => {
@@ -145,10 +148,10 @@ export default function LessonScreen() {
   if (!lesson) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.notFound}>
-          <Text style={styles.notFoundText}>Lesson not found.</Text>
+        <View className="flex-1 items-center justify-center gap-4 p-8">
+          <Text className="font-[Poppins_500Medium] text-[16px] text-[#6B7280]">Lesson not found.</Text>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text className="font-[Poppins_600SemiBold] text-[15px] text-white">Go Back</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -160,31 +163,42 @@ export default function LessonScreen() {
     <SafeAreaView style={styles.safe}>
 
       {/* ── Full-screen scene — flex:1 fills everything below SafeAreaView ── */}
-      <View style={styles.scene}>
+      <View className="flex-1 relative">
 
         {/* Room background fills the whole scene */}
-        <View style={styles.roomBackground} />
+        <View className="absolute inset-0 bg-[#C8CDD8]" />
 
         {/* ── Header — floats at the top of the scene ─────────────────────── */}
         <View style={styles.header}>
-          <Pressable style={styles.headerBack} onPress={() => router.back()} hitSlop={12}>
-            <Ionicons name="chevron-back" size={22} color="#0D132B" />
-          </Pressable>
+          <View className="w-9 h-9 items-center justify-center">
+            <Pressable
+              onPress={() => router.back()}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="chevron-back" size={22} color="#0D132B" />
+            </Pressable>
+          </View>
 
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>AI Teacher</Text>
-            <View style={styles.onlineRow}>
-              <View style={styles.onlineDot} />
-              <Text style={styles.onlineLabel}>Online</Text>
+          <View className="flex-1 items-center">
+            <Text className="font-[Poppins_600SemiBold] text-[16px] text-[#0D132B]">AI Teacher</Text>
+            <View className="flex-row items-center gap-1">
+              <View className="w-[7px] h-[7px] rounded-full bg-[#21C16B]" />
+              <Text className="font-[Poppins_400Regular] text-[12px] text-[#21C16B]">Online</Text>
             </View>
           </View>
 
-          <View style={styles.headerRight}>
-            <View style={styles.xpBadge}>
+          <View className="flex-row items-center gap-[10px] w-20 justify-end">
+            <View className="flex-row items-center gap-[3px] bg-[#F3EFFF] rounded-xl px-2 py-[3px]">
               <Ionicons name="flash" size={12} color="#6C4EF5" />
-              <Text style={styles.xpBadgeText}>{lesson.totalXP}</Text>
+              <Text className="font-[Poppins_600SemiBold] text-[12px] text-[#6C4EF5]">{lesson.totalXP}</Text>
             </View>
-            <Pressable hitSlop={12}>
+            <Pressable
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Notifications"
+            >
               <Ionicons name="notifications-outline" size={22} color="#0D132B" />
             </Pressable>
           </View>
@@ -193,7 +207,7 @@ export default function LessonScreen() {
         {/* Session timer — top left, below header */}
         <View style={styles.timerBadge}>
           <Ionicons name="time-outline" size={12} color="#FFFFFF" />
-          <Text style={styles.timerText}>{formatTime(sessionDurationSecs)}</Text>
+          <Text className="font-[Poppins_500Medium] text-[12px] text-white">{formatTime(sessionDurationSecs)}</Text>
         </View>
 
         {/* Student thumbnail — top right */}
@@ -210,13 +224,17 @@ export default function LessonScreen() {
 
         {/* Speech bubble — above the bottom panel */}
         {isSubtitlesOn && (
-          <View style={styles.speechBubble}>
-            <View style={styles.speechBubbleContent}>
-              <View style={styles.speechBubbleText}>
-                <Text style={styles.speechTarget}>{currentMessage.target}</Text>
-                <Text style={styles.speechTranslation}>{currentMessage.translation}</Text>
+          <View style={[styles.speechBubble, { left: Math.round(windowWidth * 0.52) }]}>
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1">
+                <Text className="font-[Poppins_600SemiBold] text-[14px] text-[#0D132B]">{currentMessage.target}</Text>
+                <Text className="font-[Poppins_400Regular] text-[12px] text-[#6B7280] mt-[2px]">{currentMessage.translation}</Text>
               </View>
-              <Pressable hitSlop={8}>
+              <Pressable
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Play audio"
+              >
                 <Ionicons name="volume-high" size={22} color="#6C4EF5" />
               </Pressable>
             </View>
@@ -229,17 +247,21 @@ export default function LessonScreen() {
         <View style={styles.bottomPanel}>
 
           {/* Controls row */}
-          <View style={styles.controls}>
+          <View className="flex-row justify-center items-start gap-7 pt-5 pb-4 px-4">
             {/* Camera (visual placeholder — audio-only) */}
-            <View style={styles.controlItem}>
-              <Pressable style={[styles.controlBtn, styles.controlBtnInactive]}>
+            <View className="items-center gap-1.5">
+              <Pressable
+                style={[styles.controlBtn, styles.controlBtnInactive]}
+                accessibilityRole="button"
+                accessibilityLabel="Camera off"
+              >
                 <Ionicons name="videocam-off" size={22} color="#6B7280" />
               </Pressable>
-              <Text style={styles.controlLabel}>Camera</Text>
+              <Text className="font-[Poppins_400Regular] text-[11px] text-[#6B7280] text-center">Camera</Text>
             </View>
 
             {/* Mic */}
-            <View style={styles.controlItem}>
+            <View className="items-center gap-1.5">
               <View>
                 <Animated.View
                   style={[
@@ -250,6 +272,9 @@ export default function LessonScreen() {
                 <Pressable
                   style={[styles.controlBtn, isMicOn && styles.controlBtnActive]}
                   onPress={() => setIsMicOn((v) => !v)}
+                  accessibilityRole="button"
+                  accessibilityLabel={isMicOn ? "Mute microphone" : "Unmute microphone"}
+                  accessibilityState={{ checked: isMicOn }}
                 >
                   <Ionicons
                     name={isMicOn ? "mic" : "mic-off"}
@@ -258,14 +283,17 @@ export default function LessonScreen() {
                   />
                 </Pressable>
               </View>
-              <Text style={styles.controlLabel}>Mic</Text>
+              <Text className="font-[Poppins_400Regular] text-[11px] text-[#6B7280] text-center">Mic</Text>
             </View>
 
             {/* Subtitles */}
-            <View style={styles.controlItem}>
+            <View className="items-center gap-1.5">
               <Pressable
                 style={[styles.controlBtn, isSubtitlesOn && styles.controlBtnActive]}
                 onPress={() => setIsSubtitlesOn((v) => !v)}
+                accessibilityRole="button"
+                accessibilityLabel={isSubtitlesOn ? "Hide subtitles" : "Show subtitles"}
+                accessibilityState={{ checked: isSubtitlesOn }}
               >
                 <Ionicons
                   name="text"
@@ -273,14 +301,16 @@ export default function LessonScreen() {
                   color={isSubtitlesOn ? "#FFFFFF" : "#6B7280"}
                 />
               </Pressable>
-              <Text style={styles.controlLabel}>Subtitles</Text>
+              <Text className="font-[Poppins_400Regular] text-[11px] text-[#6B7280] text-center">Subtitles</Text>
             </View>
 
             {/* End Call */}
-            <View style={styles.controlItem}>
+            <View className="items-center gap-1.5">
               <Pressable
                 style={[styles.controlBtn, styles.controlBtnEndCall]}
                 onPress={() => router.back()}
+                accessibilityRole="button"
+                accessibilityLabel="End call"
               >
                 <Ionicons
                   name="call"
@@ -289,12 +319,12 @@ export default function LessonScreen() {
                   style={{ transform: [{ rotate: "135deg" }] }}
                 />
               </Pressable>
-              <Text style={styles.controlLabel}>End Call</Text>
+              <Text className="font-[Poppins_400Regular] text-[11px] text-[#6B7280] text-center">End Call</Text>
             </View>
           </View>
 
           {/* Feedback strip */}
-          <View style={styles.feedbackCard}>
+          <View className="flex-row border-t border-[#F3F4F6] pb-2">
             {(
               [
                 { label: "Speaking", score: feedback.speaking },
@@ -304,10 +334,10 @@ export default function LessonScreen() {
             ).map((item, index) => (
               <View
                 key={item.label}
-                style={[styles.feedbackItem, index < 2 && styles.feedbackItemBorder]}
+                className={`flex-1 items-center py-[14px] gap-1 ${index < 2 ? 'border-r border-[#E5E7EB]' : ''}`}
               >
-                <Text style={styles.feedbackLabel}>{item.label}</Text>
-                <Text style={[styles.feedbackScore, { color: scoreColor(item.score) }]}>
+                <Text className="font-[Poppins_500Medium] text-[13px] text-[#0D132B]">{item.label}</Text>
+                <Text className="font-[Poppins_600SemiBold] text-[13px]" style={{ color: scoreColor(item.score) }}>
                   {item.score}
                 </Text>
               </View>
@@ -332,20 +362,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#C8CDD8",
   },
 
-  // ── Full-screen scene ───────────────────────────────────────────────────────
-  scene: {
-    flex: 1,
-    position: "relative",
-  },
-  roomBackground: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#C8CDD8",
-  },
-
   // ── Header (floats at the top of the scene) ────────────────────────────────
   header: {
     position: "absolute",
@@ -358,58 +374,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: "rgba(255,255,255,0.92)",
     zIndex: 20,
-  },
-  headerBack: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 16,
-    color: "#0D132B",
-  },
-  onlineRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  onlineDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: "#21C16B",
-  },
-  onlineLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "#21C16B",
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    width: 80,
-    justifyContent: "flex-end",
-  },
-  xpBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: "#F3EFFF",
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  xpBadgeText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-    color: "#6C4EF5",
   },
 
   // ── Timer badge ─────────────────────────────────────────────────────────────
@@ -425,11 +389,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     zIndex: 10,
-  },
-  timerText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 12,
-    color: "#FFFFFF",
   },
 
   // ── Student thumbnail ───────────────────────────────────────────────────────
@@ -463,10 +422,11 @@ const styles = StyleSheet.create({
   },
 
   // ── Speech bubble ───────────────────────────────────────────────────────────
+  // speechBubble left is computed at render time from windowWidth (see JSX)
+  // to avoid overflowing on narrow screens (<340 px).
   speechBubble: {
     position: "absolute",
-    bottom: 220,      // just above the controls row
-    left: 200,
+    bottom: 220,
     right: 16,
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -477,25 +437,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 8,
     zIndex: 10,
-  },
-  speechBubbleContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  speechBubbleText: {
-    flex: 1,
-  },
-  speechTarget: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-    color: "#0D132B",
-  },
-  speechTranslation: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
   },
   bubbleTail: {
     position: "absolute",
@@ -528,20 +469,7 @@ const styles = StyleSheet.create({
     zIndex: 15,
   },
 
-  // ── Controls row ────────────────────────────────────────────────────────────
-  controls: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    gap: 28,
-    paddingTop: 20,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-  },
-  controlItem: {
-    alignItems: "center",
-    gap: 6,
-  },
+  // ── Control buttons (Pressable — keep in StyleSheet) ────────────────────────
   controlBtn: {
     width: 56,
     height: 56,
@@ -572,12 +500,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  controlLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 11,
-    color: "#6B7280",
-    textAlign: "center",
-  },
   micPulse: {
     position: "absolute",
     top: 0,
@@ -589,55 +511,11 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
 
-  // ── Feedback strip ──────────────────────────────────────────────────────────
-  feedbackCard: {
-    flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-    paddingBottom: 8,
-  },
-  feedbackItem: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 14,
-    gap: 4,
-  },
-  feedbackItemBorder: {
-    borderRightWidth: 1,
-    borderRightColor: "#E5E7EB",
-  },
-  feedbackLabel: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 13,
-    color: "#0D132B",
-  },
-  feedbackScore: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-  },
-
-  // ── Not found ───────────────────────────────────────────────────────────────
-  notFound: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 16,
-    padding: 32,
-  },
-  notFoundText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 16,
-    color: "#6B7280",
-  },
+  // ── Not found — backButton Pressable ────────────────────────────────────────
   backButton: {
     backgroundColor: "#6C4EF5",
     borderRadius: 12,
     paddingHorizontal: 24,
     paddingVertical: 12,
-  },
-  backButtonText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-    color: "#FFFFFF",
   },
 });
