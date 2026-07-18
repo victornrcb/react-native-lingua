@@ -943,6 +943,441 @@ const jaLesson1_3: Lesson = {
 };
 
 // ═════════════════════════════════════════════════════════════════════════════
+// FRENCH — Unit 2: Numbers & Time
+// ═════════════════════════════════════════════════════════════════════════════
+
+const fr2Vocab: VocabItem[] = [
+  { word: "un", translation: "one", partOfSpeech: "noun" },
+  { word: "deux", translation: "two", partOfSpeech: "noun" },
+  { word: "trois", translation: "three", partOfSpeech: "noun" },
+  { word: "quatre", translation: "four", partOfSpeech: "noun" },
+  { word: "cinq", translation: "five", partOfSpeech: "noun" },
+  { word: "dix", translation: "ten", partOfSpeech: "noun" },
+  { word: "Quelle heure est-il?", translation: "What time is it?", partOfSpeech: "phrase" },
+  { word: "Il est midi.", translation: "It is noon.", partOfSpeech: "phrase" },
+];
+
+const fr2VocabActivities: Activity[] = [
+  {
+    id: "fr-2-1-act-1",
+    type: "multiple_choice",
+    prompt: "What does 'trois' mean?",
+    options: [
+      { id: "a", text: "Two", isCorrect: false },
+      { id: "b", text: "Four", isCorrect: false },
+      { id: "c", text: "Three", isCorrect: true },
+      { id: "d", text: "Five", isCorrect: false },
+    ],
+    xpReward: 10,
+  },
+  {
+    id: "fr-2-1-act-2",
+    type: "arrange_words",
+    prompt: "Arrange to ask for the time:",
+    wordBank: ["est-il", "Quelle", "heure", "?"],
+    correctAnswer: "Quelle heure est-il ?",
+    xpReward: 15,
+  },
+];
+
+const fr2GrammarActivities: Activity[] = [
+  {
+    id: "fr-2-2-act-1",
+    type: "fill_in_blank",
+    prompt: "Complete: '___ est deux heures.' (It is two o'clock.)",
+    sentence: "___ est deux heures.",
+    blankToken: "___",
+    correctAnswer: "Il",
+    hint: "French uses 'il' as the impersonal subject for time.",
+    xpReward: 15,
+  },
+  {
+    id: "fr-2-2-act-2",
+    type: "true_or_false",
+    prompt: "'Cinq' means 'six' — true or false?",
+    options: [
+      { id: "true", text: "True", isCorrect: false },
+      { id: "false", text: "False", isCorrect: true },
+    ],
+    xpReward: 10,
+  },
+];
+
+const fr2AudioActivities: Activity[] = [
+  {
+    id: "fr-2-3-act-1",
+    type: "listen_and_repeat",
+    prompt: "Listen and repeat: un, deux, trois, quatre, cinq.",
+    xpReward: 10,
+  },
+  {
+    id: "fr-2-3-act-2",
+    type: "speak_it",
+    prompt: "Say aloud: 'Quelle heure est-il? Il est trois heures.'",
+    correctAnswer: "Quelle heure est-il? Il est trois heures.",
+    xpReward: 20,
+  },
+];
+
+const frLesson2_1: Lesson = {
+  id: "fr-2-1-vocab",
+  unitId: "fr-unit-2",
+  title: "1, 2, 3 — Les Chiffres",
+  description: "Learn numbers 1-10 and start counting in French.",
+  type: "vocabulary",
+  order: 1,
+  durationMinutes: 5,
+  goals: [{ description: "Learn numbers 1 to 10 in French", skill: "vocabulary" }],
+  vocabulary: fr2Vocab,
+  phrases: [],
+  activities: fr2VocabActivities,
+  totalXP: calcTotalXP(fr2VocabActivities),
+  isLocked: true,
+  iconName: "number",
+};
+
+const frLesson2_2: Lesson = {
+  id: "fr-2-2-grammar",
+  unitId: "fr-unit-2",
+  title: "Quelle Heure Est-il?",
+  description: "Learn to tell the time using 'il est' in French.",
+  type: "grammar",
+  order: 2,
+  durationMinutes: 6,
+  goals: [{ description: "Use 'il est' correctly for telling time", skill: "grammar" }],
+  vocabulary: fr2Vocab,
+  phrases: [
+    { phrase: "Quelle heure est-il?", translation: "What time is it?", pronunciation: "kel-UR-eh-TEEL" },
+    { phrase: "Il est deux heures.", translation: "It is two o'clock.", pronunciation: "il-EH-duh-ZUHR" },
+  ],
+  activities: fr2GrammarActivities,
+  totalXP: calcTotalXP(fr2GrammarActivities),
+  isLocked: true,
+  iconName: "clock",
+};
+
+const frLesson2_3: Lesson = {
+  id: "fr-2-3-audio",
+  unitId: "fr-unit-2",
+  title: "Compter à Voix Haute",
+  description: "Practise French number pronunciation with native audio.",
+  type: "audio",
+  order: 3,
+  durationMinutes: 5,
+  goals: [{ description: "Pronounce French numbers clearly", skill: "pronunciation" }],
+  vocabulary: fr2Vocab,
+  phrases: [],
+  activities: fr2AudioActivities,
+  totalXP: calcTotalXP(fr2AudioActivities),
+  isLocked: true,
+  iconName: "ear",
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
+// FRENCH — Unit 3: At the Café
+// ═════════════════════════════════════════════════════════════════════════════
+
+const fr3Vocab: VocabItem[] = [
+  { word: "un café", translation: "a coffee", partOfSpeech: "noun", exampleSentence: "Un café, s'il vous plaît.", exampleTranslation: "A coffee, please." },
+  { word: "un thé", translation: "a tea", partOfSpeech: "noun" },
+  { word: "l'eau", translation: "water", partOfSpeech: "noun" },
+  { word: "l'addition", translation: "the bill / check", partOfSpeech: "noun" },
+  { word: "commander", translation: "to order", partOfSpeech: "verb" },
+  { word: "je voudrais", translation: "I would like", partOfSpeech: "phrase" },
+];
+
+const fr3CafeActivities: Activity[] = [
+  {
+    id: "fr-3-1-act-1",
+    type: "multiple_choice",
+    prompt: "What does 'je voudrais' mean?",
+    options: [
+      { id: "a", text: "I would like", isCorrect: true },
+      { id: "b", text: "I would go", isCorrect: false },
+      { id: "c", text: "I want now", isCorrect: false },
+      { id: "d", text: "Give me", isCorrect: false },
+    ],
+    xpReward: 10,
+  },
+  {
+    id: "fr-3-1-act-2",
+    type: "fill_in_blank",
+    prompt: "Order a coffee politely:",
+    sentence: "Je voudrais ___ café, s'il vous plaît.",
+    blankToken: "___",
+    correctAnswer: "un",
+    hint: "The indefinite article for masculine nouns.",
+    xpReward: 15,
+  },
+  {
+    id: "fr-3-1-act-3",
+    type: "arrange_words",
+    prompt: "Arrange to ask for the bill:",
+    wordBank: ["L'addition,", "plaît.", "s'il", "vous"],
+    correctAnswer: "L'addition, s'il vous plaît.",
+    xpReward: 15,
+  },
+];
+
+const fr3ConversationActivities: Activity[] = [
+  {
+    id: "fr-3-2-act-1",
+    type: "multiple_choice",
+    prompt: "How do you say 'the bill please' in French?",
+    options: [
+      { id: "a", text: "Un café, s'il vous plaît", isCorrect: false },
+      { id: "b", text: "L'addition, s'il vous plaît", isCorrect: true },
+      { id: "c", text: "Je voudrais l'eau", isCorrect: false },
+      { id: "d", text: "Merci beaucoup", isCorrect: false },
+    ],
+    xpReward: 10,
+  },
+  {
+    id: "fr-3-2-act-2",
+    type: "true_or_false",
+    prompt: "'Commander' means 'to order' — true or false?",
+    options: [
+      { id: "true", text: "True", isCorrect: true },
+      { id: "false", text: "False", isCorrect: false },
+    ],
+    xpReward: 10,
+  },
+];
+
+const fr3AIActivities: Activity[] = [
+  {
+    id: "fr-3-3-act-1",
+    type: "speak_it",
+    prompt: "Order a coffee and ask for the bill in French.",
+    xpReward: 30,
+  },
+];
+
+const frLesson3_1: Lesson = {
+  id: "fr-3-1-vocab",
+  unitId: "fr-unit-3",
+  title: "Au Café — Vocabulary",
+  description: "Learn the key words you need to order food and drink at a French café.",
+  type: "vocabulary",
+  order: 1,
+  durationMinutes: 5,
+  goals: [{ description: "Learn 6 café vocabulary words", skill: "vocabulary" }],
+  vocabulary: fr3Vocab,
+  phrases: [],
+  activities: fr3CafeActivities,
+  totalXP: calcTotalXP(fr3CafeActivities),
+  isLocked: true,
+  iconName: "cup.and.saucer",
+};
+
+const frLesson3_2: Lesson = {
+  id: "fr-3-2-conversation",
+  unitId: "fr-unit-3",
+  title: "Ordering at the Café",
+  description: "Put it all together — order drinks and ask for the bill like a local.",
+  type: "conversation",
+  order: 2,
+  durationMinutes: 6,
+  goals: [
+    { description: "Order food and drinks using 'je voudrais'", skill: "speaking" },
+    { description: "Ask for the bill politely", skill: "vocabulary" },
+  ],
+  vocabulary: fr3Vocab,
+  phrases: [
+    { phrase: "Je voudrais un café.", translation: "I would like a coffee.", pronunciation: "zhuh voo-DREH uhn kah-FAY" },
+    { phrase: "L'addition, s'il vous plaît.", translation: "The bill, please.", pronunciation: "lah-dee-SYOHN seel voo PLEH" },
+  ],
+  activities: fr3ConversationActivities,
+  totalXP: calcTotalXP(fr3ConversationActivities),
+  isLocked: true,
+  iconName: "person.2",
+};
+
+const frLesson3_3: Lesson = {
+  id: "fr-3-3-ai-teacher",
+  unitId: "fr-unit-3",
+  title: "Live Café Session",
+  description: "Practice a full café conversation with your AI French teacher Camille.",
+  type: "ai_teacher",
+  order: 3,
+  durationMinutes: 10,
+  goals: [
+    { description: "Order a meal at a café in French", skill: "speaking" },
+    { description: "Understand the waiter's questions", skill: "listening" },
+  ],
+  vocabulary: fr3Vocab,
+  phrases: [],
+  activities: fr3AIActivities,
+  totalXP: calcTotalXP(fr3AIActivities),
+  isLocked: true,
+  iconName: "video.circle",
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
+// JAPANESE — Unit 2: Numbers & Counting
+// ═════════════════════════════════════════════════════════════════════════════
+
+const ja2Vocab: VocabItem[] = [
+  { word: "いち", translation: "one", romanization: "ichi", partOfSpeech: "noun" },
+  { word: "に", translation: "two", romanization: "ni", partOfSpeech: "noun" },
+  { word: "さん", translation: "three", romanization: "san", partOfSpeech: "noun" },
+  { word: "し / よん", translation: "four", romanization: "shi / yon", partOfSpeech: "noun" },
+  { word: "ご", translation: "five", romanization: "go", partOfSpeech: "noun" },
+  { word: "じゅう", translation: "ten", romanization: "juu", partOfSpeech: "noun" },
+  { word: "なんじですか？", translation: "What time is it?", romanization: "Nanji desu ka?", partOfSpeech: "phrase" },
+  { word: "いちじです。", translation: "It is one o'clock.", romanization: "Ichi-ji desu.", partOfSpeech: "phrase" },
+];
+
+const ja2VocabActivities: Activity[] = [
+  {
+    id: "ja-2-1-act-1",
+    type: "multiple_choice",
+    prompt: "What does 'さん (san)' mean?",
+    options: [
+      { id: "a", text: "Two", isCorrect: false },
+      { id: "b", text: "Three", isCorrect: true },
+      { id: "c", text: "Four", isCorrect: false },
+      { id: "d", text: "Five", isCorrect: false },
+    ],
+    xpReward: 10,
+  },
+  {
+    id: "ja-2-1-act-2",
+    type: "match_pairs",
+    prompt: "Match the Japanese number to its English meaning.",
+    options: [
+      { id: "ichi", text: "いち", isCorrect: true },
+      { id: "one", text: "one", isCorrect: true },
+      { id: "go", text: "ご", isCorrect: true },
+      { id: "five", text: "five", isCorrect: true },
+    ],
+    xpReward: 20,
+  },
+];
+
+const ja2GrammarActivities: Activity[] = [
+  {
+    id: "ja-2-2-act-1",
+    type: "fill_in_blank",
+    prompt: "Complete: '___じですか？' (What time is it?)",
+    sentence: "___じですか？",
+    blankToken: "___",
+    correctAnswer: "なん",
+    hint: "'なん' is the Japanese question word for 'what' in this context.",
+    xpReward: 15,
+  },
+  {
+    id: "ja-2-2-act-2",
+    type: "true_or_false",
+    prompt: "'に (ni)' means 'two' — true or false?",
+    options: [
+      { id: "true", text: "True", isCorrect: true },
+      { id: "false", text: "False", isCorrect: false },
+    ],
+    xpReward: 10,
+  },
+];
+
+const ja2AudioActivities: Activity[] = [
+  {
+    id: "ja-2-3-act-1",
+    type: "listen_and_repeat",
+    prompt: "Listen and repeat: いち、に、さん、し、ご (ichi, ni, san, shi, go).",
+    xpReward: 10,
+  },
+  {
+    id: "ja-2-3-act-2",
+    type: "speak_it",
+    prompt: "Say aloud: 'なんじですか？ さんじです。'",
+    correctAnswer: "なんじですか？ さんじです。",
+    xpReward: 20,
+  },
+];
+
+const ja2AIActivities: Activity[] = [
+  {
+    id: "ja-2-4-act-1",
+    type: "speak_it",
+    prompt: "Tell your teacher what time it is and count from one to five in Japanese.",
+    xpReward: 30,
+  },
+];
+
+const jaLesson2_1: Lesson = {
+  id: "ja-2-1-vocab",
+  unitId: "ja-unit-2",
+  title: "いち、に、さん — Numbers",
+  description: "Learn numbers 1-10 and start counting in Japanese.",
+  type: "vocabulary",
+  order: 1,
+  durationMinutes: 5,
+  goals: [{ description: "Learn numbers 1 to 10 in Japanese", skill: "vocabulary" }],
+  vocabulary: ja2Vocab,
+  phrases: [],
+  activities: ja2VocabActivities,
+  totalXP: calcTotalXP(ja2VocabActivities),
+  isLocked: true,
+  iconName: "number",
+};
+
+const jaLesson2_2: Lesson = {
+  id: "ja-2-2-grammar",
+  unitId: "ja-unit-2",
+  title: "なんじですか？ — What Time?",
+  description: "Learn to ask and tell the time in Japanese.",
+  type: "grammar",
+  order: 2,
+  durationMinutes: 6,
+  goals: [{ description: "Ask and answer what time it is in Japanese", skill: "grammar" }],
+  vocabulary: ja2Vocab,
+  phrases: [
+    { phrase: "なんじですか？", translation: "What time is it?", pronunciation: "Nanji desu ka?" },
+    { phrase: "さんじです。", translation: "It is three o'clock.", pronunciation: "Sanji desu." },
+  ],
+  activities: ja2GrammarActivities,
+  totalXP: calcTotalXP(ja2GrammarActivities),
+  isLocked: true,
+  iconName: "clock",
+};
+
+const jaLesson2_3: Lesson = {
+  id: "ja-2-3-audio",
+  unitId: "ja-unit-2",
+  title: "Count Out Loud",
+  description: "Practise Japanese number pronunciation with native audio.",
+  type: "audio",
+  order: 3,
+  durationMinutes: 5,
+  goals: [{ description: "Pronounce Japanese numbers clearly", skill: "pronunciation" }],
+  vocabulary: ja2Vocab,
+  phrases: [],
+  activities: ja2AudioActivities,
+  totalXP: calcTotalXP(ja2AudioActivities),
+  isLocked: true,
+  iconName: "ear",
+};
+
+const jaLesson2_4: Lesson = {
+  id: "ja-2-4-ai-teacher",
+  unitId: "ja-unit-2",
+  title: "Live Numbers Session",
+  description: "Practice numbers and telling the time with your AI Japanese teacher.",
+  type: "ai_teacher",
+  order: 4,
+  durationMinutes: 10,
+  goals: [
+    { description: "Count to ten confidently in Japanese", skill: "speaking" },
+    { description: "Tell the time using Japanese number patterns", skill: "speaking" },
+  ],
+  vocabulary: ja2Vocab,
+  phrases: [],
+  activities: ja2AIActivities,
+  totalXP: calcTotalXP(ja2AIActivities),
+  isLocked: true,
+  iconName: "video.circle",
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
 // COMBINED EXPORTS
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -962,6 +1397,12 @@ export const frenchLessons: Lesson[] = [
   frLesson1_1,
   frLesson1_2,
   frLesson1_3,
+  frLesson2_1,
+  frLesson2_2,
+  frLesson2_3,
+  frLesson3_1,
+  frLesson3_2,
+  frLesson3_3,
 ];
 
 /** All lessons for Japanese */
@@ -969,6 +1410,10 @@ export const japaneseLessons: Lesson[] = [
   jaLesson1_1,
   jaLesson1_2,
   jaLesson1_3,
+  jaLesson2_1,
+  jaLesson2_2,
+  jaLesson2_3,
+  jaLesson2_4,
 ];
 
 /**
@@ -1005,3 +1450,4 @@ export function getLessonById(id: string): Lesson | undefined {
 export function getLessonsForUnit(unitId: string): Lesson[] {
   return allLessons.filter((lesson) => lesson.unitId === unitId);
 }
+

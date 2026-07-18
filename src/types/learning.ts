@@ -185,6 +185,8 @@ export interface Unit {
   icon: string;
   /** IDs of lessons in this unit (ordered) */
   lessonIds: string[];
+  /** Optional scene/cover image URL shown in the unit header */
+  coverImage?: string;
 }
 
 // ──────────────────── Course (convenience aggregate) ──────────────────────────

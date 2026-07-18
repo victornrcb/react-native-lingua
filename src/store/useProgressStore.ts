@@ -33,7 +33,7 @@ export const useProgressStore = create<ProgressState>()(
       todayXP: 15,
       dailyGoalXP: 20,
       streak: 12,
-      completedLessonIds: ["es-1-1-vocab"],
+      completedLessonIds: ["es-1-1-vocab", "es-1-2-phrases"],
 
       addXP: (amount) => {
         set((state) => ({ todayXP: state.todayXP + amount }));
