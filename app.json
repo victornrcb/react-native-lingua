@@ -38,7 +38,23 @@
       ],
       "@clerk/expo",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "@stream-io/video-react-native-sdk",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": "Duolingo Clone requires camera access to capture and transmit video",
+          "microphonePermission": "Duolingo Clone requires microphone access to capture and transmit audio"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
